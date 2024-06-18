@@ -4,6 +4,7 @@ import 'Exercise.dart';
 import 'ExerciseController.dart';
 import 'Group.dart';
 import 'Workout.dart';
+import 'Profile.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -27,7 +28,7 @@ class DatabaseHelper {
             name TEXT PRIMARY KEY,
             type INTEGER,
             iconPath TEXT,
-            group TEXT,
+            groupName TEXT,
             description TEXT
           )
         ''');
@@ -59,7 +60,11 @@ class DatabaseHelper {
         ''');
         await db.execute('''
           CREATE TABLE profiles (
-            name TEXT PRIMARY KEY
+            name TEXT PRIMARY KEY,
+            age INTEGER,
+            weight REAL,
+            height REAL,
+            date TEXT
           )
         ''');
       },
@@ -84,7 +89,15 @@ class DatabaseHelper {
     });
   }
 
-  // Implementacja CRUD dla innych klas
+  Future<void> deleteExercise(String name) async {
+    final db = await database;
+    await db.delete(
+      'exercises',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+  }
+
   Future<void> insertExerciseController(ExerciseController controller) async {
     final db = await database;
     await db.insert(
@@ -100,6 +113,15 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return ExerciseController.fromMap(maps[i]);
     });
+  }
+
+  Future<void> deleteExerciseController(int id) async {
+    final db = await database;
+    await db.delete(
+      'exercise_controllers',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<void> insertWorkout(Workout workout) async {
@@ -119,6 +141,15 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> deleteWorkout(int id) async {
+    final db = await database;
+    await db.delete(
+      'workouts',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> insertGroup(Groups group) async {
     final db = await database;
     await db.insert(
@@ -134,5 +165,51 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Groups.fromMap(maps[i]);
     });
+  }
+
+  Future<void> deleteGroup(String name) async {
+    final db = await database;
+    await db.delete(
+      'groups',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+  }
+
+  Future<void> insertProfile(Profile profile) async {
+    final db = await database;
+    await db.insert(
+      'profiles',
+      profile.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Profile?> getProfile() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('profiles');
+    if (maps.isNotEmpty) {
+      return Profile.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<void> updateProfile(Profile profile) async {
+    final db = await database;
+    await db.update(
+      'profiles',
+      profile.toMap(),
+      where: 'name = ?',
+      whereArgs: [profile.name],
+    );
+  }
+
+  Future<void> deleteProfile(String name) async {
+    final db = await database;
+    await db.delete(
+      'profiles',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
   }
 }

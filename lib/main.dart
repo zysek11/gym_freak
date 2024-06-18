@@ -5,7 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as Path;
 
-void main() {
+import 'Pages/MenuPages/MainPage.dart';
+import 'database_classes/DatabaseHelper.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseHelper().database;
   runApp(const MyApp());
 }
 
@@ -49,7 +54,7 @@ class _InitializerState extends State<Initializer> {
       await _loadDataFromDatabase();
       if(mounted) {
         Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const WorkoutPage()),
+        MaterialPageRoute(builder: (context) => const MainPage()),
       );
       }
     }

@@ -39,7 +39,7 @@ class _StarterTwoState extends State<StarterTwo> {
                         Expanded(
                           flex: 3,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.only(left: 12.0),
                             child: RichText(
                               textAlign: TextAlign.left,
                               text: TextSpan(
@@ -56,10 +56,9 @@ class _StarterTwoState extends State<StarterTwo> {
                         Expanded(
                           flex: 2,
                           child: Padding(
-                            padding: const EdgeInsets.all(2.0),
+                            padding: const EdgeInsets.only(right: 12.0),
                             child: Image.asset(
                               'assets/gymmy/9th.png', // Ścieżka do twojego logo
-                              width: 150,
                             ),
                           ),
                         ),

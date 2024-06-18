@@ -8,6 +8,7 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
