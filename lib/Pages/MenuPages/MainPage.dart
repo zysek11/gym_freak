@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:provider/provider.dart';
 
+import '../../Language/LanguageProvider.dart';
+import '../../Theme/DarkThemeProvider.dart';
+import '../../Theme/Styles.dart';
 import 'ExercisesPage.dart';
 import 'SettingsPage.dart';
 import 'WorkoutPage.dart';
@@ -17,13 +21,18 @@ class _MainPageState extends State<MainPage> {
   int currentIndex = 0;
 
   final List<Widget> _screens = [
-    WorkoutPage(),
-    ExercisesPage(),
-    SettingsPage(),
+    const WorkoutPage(),
+    const ExercisesPage(),
+    const SettingsPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final themeChange = Provider.of<DarkThemeProvider>(context);
+    Styles styles = Styles();
+    styles.setColors(themeChange.darkTheme);
+    final langChange = Provider.of<LanguageProvider>(context);
+    Map<String, String> ls = langChange.localizedStrings;
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
@@ -50,7 +59,7 @@ class _MainPageState extends State<MainPage> {
               GButton(
                 icon: Ionicons.home_outline,
                 iconSize: 0,
-                text: 'Workout',
+                text: ls['workout']!,
                 textStyle: TextStyle( // Ustawienie stylu tekstu
                   fontFamily: 'Jaapokki',
                   fontSize: 21,
@@ -73,7 +82,7 @@ class _MainPageState extends State<MainPage> {
               GButton(
                 icon: Ionicons.home_outline,
                 iconSize: 0,
-                text: 'Exercises',
+                text: ls['exercises']!,
                 textStyle: TextStyle( // Ustawienie stylu tekstu
                     fontFamily: 'Jaapokki',
                     fontSize: 21,
@@ -96,7 +105,7 @@ class _MainPageState extends State<MainPage> {
               GButton(
                 icon: Ionicons.home_outline,
                 iconSize: 0,
-                text: 'Settings',
+                text: ls['settings']!,
                 textStyle: TextStyle( // Ustawienie stylu tekstu
                     fontFamily: 'Jaapokki',
                     fontSize: 23,

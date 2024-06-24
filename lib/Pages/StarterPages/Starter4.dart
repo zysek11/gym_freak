@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gym_freak/Pages/MenuPages/WorkoutPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../database_classes/DatabaseHelper.dart';
+import '../../database_classes/Profile.dart';
 import '../MenuPages/MainPage.dart';
 
 class StarterFour extends StatefulWidget {
@@ -17,9 +19,22 @@ class _StarterFourState extends State<StarterFour> {
 
   Future<void> _saveUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('userExist',true);
-  }
+    prefs.setBool('userExist', true);
 
+    String name = _controller.text;
+
+    // Tworzenie profilu z imieniem, reszta pól ustawiona na domyślne wartości
+    Profile profile = Profile(
+      name: name,
+      age: 0,
+      weight: 0.0,
+      height: 0.0,
+      date: DateTime.now(),
+    );
+
+    // Zapisywanie profilu do bazy danych
+    await DatabaseHelper().insertProfile(profile);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,15 +159,17 @@ class _StarterFourState extends State<StarterFour> {
                 width: double.infinity,
                 height: 70,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if(_controller.text.isNotEmpty){
-                      _saveUser();
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const MainPage(),
-                          ));
+                      await _saveUser();
+                      if(mounted){
+                        Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => const MainPage(),
+                            ));
+                      }
                     }
                     else {
-                      final snackBar = const SnackBar(
+                      const snackBar = SnackBar(
                         content: Text('Please enter your name.',style: TextStyle(color: Colors.black),),
                         duration: Duration(seconds: 2),
                         backgroundColor: Color(0xFFFFFFFF),

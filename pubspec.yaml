@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.2.3
   google_nav_bar: ^5.0.6
   ionicons: ^0.2.2
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,10 @@ flutter:
     - assets/menu/exercises.png
     - assets/menu/settings.png
     - assets/menu/workout.png
+    - assets/jsons/en.json
+    - assets/jsons/pl.json
+    - assets/icons/right_arrow.png
+    - assets/icons/right_arrow2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
