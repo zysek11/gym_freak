@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gym_freak/Pages/MenuPages/WorkoutPage.dart';
+import 'package:gym_freak/Pages/MenuPages/Workout/WorkoutPage.dart';
 import 'package:gym_freak/Pages/StarterPages/Starter1.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

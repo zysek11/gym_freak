@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import '../../Language/LanguageProvider.dart';
 import '../../Theme/DarkThemeProvider.dart';
 import '../../Theme/Styles.dart';
-import 'ExercisesPage.dart';
-import 'SettingsPage.dart';
-import 'WorkoutPage.dart';
+import 'Exercises/ExercisesPage.dart';
+import 'Settings/SettingsPage.dart';
+import 'Workout/WorkoutPage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

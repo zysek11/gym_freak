@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gym_freak/Language/LanguageJson.dart';
 import 'package:provider/provider.dart';
 
-import '../../Language/LanguageProvider.dart';
-import '../../Theme/DarkThemeProvider.dart';
-import '../../Theme/Styles.dart';
+import '../../../Language/LanguageProvider.dart';
+import '../../../Theme/DarkThemeProvider.dart';
+import '../../../Theme/Styles.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

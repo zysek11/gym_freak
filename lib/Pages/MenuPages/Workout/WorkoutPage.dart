@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gym_freak/database_classes/DatabaseHelper.dart';
 import 'package:provider/provider.dart';
 
-import '../../Language/LanguageProvider.dart';
-import '../../Theme/DarkThemeProvider.dart';
-import '../../Theme/Styles.dart';
-import '../../database_classes/Profile.dart';
+import '../../../Language/LanguageProvider.dart';
+import '../../../Theme/DarkThemeProvider.dart';
+import '../../../Theme/Styles.dart';
+import '../../../database_classes/Profile.dart';
 
 class WorkoutPage extends StatefulWidget {
   const WorkoutPage({super.key});
