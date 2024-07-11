@@ -44,7 +44,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         child: Padding(
           padding: const EdgeInsets.only(top: 20.0, left: 15, right: 15, bottom: 10),
           child: _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Column(
             children: [
               Align(
@@ -132,13 +132,16 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
-                                    Text(
-                                      'GET IN',
-                                      style: TextStyle(
-                                        color: Color(0xFF2A8CBB),
-                                        fontSize: 40,
-                                        fontFamily: 'Jaapokki',
-                                        // button text color
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: Text(
+                                        'GET IN',
+                                        style: TextStyle(
+                                          color: Color(0xFF2A8CBB),
+                                          fontSize: 40,
+                                          fontFamily: 'Jaapokki',
+                                          // button text color
+                                        ),
                                       ),
                                     ),
                                     Image.asset(
@@ -211,13 +214,16 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
-                                    Text(
-                                      'CHECK',
-                                      style: TextStyle(
-                                        color: Color(0xFFBB592A),
-                                        fontSize: 40,
-                                        fontFamily: 'Jaapokki',
-                                        // button text color
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: Text(
+                                        'CHECK',
+                                        style: TextStyle(
+                                          color: Color(0xFFBB592A),
+                                          fontSize: 40,
+                                          fontFamily: 'Jaapokki',
+                                          // button text color
+                                        ),
                                       ),
                                     ),
                                     Image.asset(

@@ -24,49 +24,53 @@ class DatabaseHelper {
       join(await getDatabasesPath(), 'fitness.db'),
       onCreate: (db, version) async {
         await db.execute('''
-          CREATE TABLE exercises (
-            name TEXT PRIMARY KEY,
-            type INTEGER,
-            iconPath TEXT,
-            groupName TEXT,
-            description TEXT
-          )
-        ''');
+        CREATE TABLE exercises (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          type TEXT,
+          application INTEGER,
+          iconPath TEXT,
+          groupName TEXT,
+          description TEXT
+        )
+      ''');
         await db.execute('''
-          CREATE TABLE exercise_controllers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            exercise TEXT,
-            series INTEGER,
-            weights TEXT,
-            repetitions TEXT
-          )
-        ''');
+        CREATE TABLE exercise_controllers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          exercise TEXT,
+          series INTEGER,
+          weights TEXT,
+          repetitions TEXT
+        )
+      ''');
         await db.execute('''
-          CREATE TABLE workouts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            exercises TEXT,
-            date TEXT,
-            intensity INTEGER,
-            satisfaction INTEGER,
-            comment TEXT,
-            time INTEGER
-          )
-        ''');
+        CREATE TABLE workouts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          exercises TEXT,
+          date TEXT,
+          intensity INTEGER,
+          satisfaction INTEGER,
+          comment TEXT,
+          time INTEGER
+        )
+      ''');
         await db.execute('''
-          CREATE TABLE groups (
-            name TEXT PRIMARY KEY,
-            exercises TEXT
-          )
-        ''');
+        CREATE TABLE groups (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          exercises TEXT
+        )
+      ''');
         await db.execute('''
-          CREATE TABLE profiles (
-            name TEXT PRIMARY KEY,
-            age INTEGER,
-            weight REAL,
-            height REAL,
-            date TEXT
-          )
-        ''');
+        CREATE TABLE profiles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          age INTEGER,
+          weight REAL,
+          height REAL,
+          date TEXT
+        )
+      ''');
       },
       version: 1,
     );
@@ -89,12 +93,22 @@ class DatabaseHelper {
     });
   }
 
-  Future<void> deleteExercise(String name) async {
+  Future<void> deleteExercise(int id) async {
     final db = await database;
     await db.delete(
       'exercises',
-      where: 'name = ?',
-      whereArgs: [name],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> updateExercise(Exercise exercise) async {
+    final db = await database;
+    await db.update(
+      'exercises',
+      exercise.toMap(),
+      where: 'id = ?',
+      whereArgs: [exercise.id],
     );
   }
 
@@ -167,12 +181,12 @@ class DatabaseHelper {
     });
   }
 
-  Future<void> deleteGroup(String name) async {
+  Future<void> deleteGroup(int id) async {
     final db = await database;
     await db.delete(
       'groups',
-      where: 'name = ?',
-      whereArgs: [name],
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 
@@ -204,12 +218,12 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> deleteProfile(String name) async {
+  Future<void> deleteProfile(int id) async {
     final db = await database;
     await db.delete(
       'profiles',
-      where: 'name = ?',
-      whereArgs: [name],
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 }

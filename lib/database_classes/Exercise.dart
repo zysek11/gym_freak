@@ -1,37 +1,45 @@
 import 'dart:convert';
 
 class Exercise {
+  final int? id;
   String name;
-  int type;
+  String type;
+  int application;
   String iconPath;
-  List<String> group;
+  List<String> groupName;
   String description;
 
   Exercise({
+    this.id,
     required this.name,
     required this.type,
+    required this.application,
     required this.iconPath,
-    required this.group,
+    required this.groupName,
     required this.description,
   });
 
   Map<String, dynamic> toMap() {
     return {
+      'id' : id,
       'name': name,
       'type': type,
+      'application': application,
       'iconPath': iconPath,
-      'group': jsonEncode(group), // Zapisujemy jako JSON
+      'groupName': jsonEncode(groupName), // Zapisujemy jako JSON
       'description': description,
     };
   }
 
   factory Exercise.fromMap(Map<String, dynamic> map) {
     return Exercise(
-      name: map['name'],
-      type: map['type'],
-      iconPath: map['iconPath'],
-      group: List<String>.from(jsonDecode(map['group'])), // Odczytujemy z JSON
-      description: map['description'],
+      id: map['id'] ?? 0,
+      name: map['name'] ?? '',
+      type: map['type'] ?? '',
+      application: map['application'] ?? 0,
+      iconPath: map['iconPath'] ?? '',
+      groupName: List<String>.from(jsonDecode(map['groupName'] ?? '[]')),
+      description: map['description'] ?? '',
     );
   }
 }

@@ -40,6 +40,7 @@ dependencies:
   google_nav_bar: ^5.0.6
   ionicons: ^0.2.2
   provider: ^6.1.2
+  multi_dropdown: ^2.1.4
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +84,7 @@ flutter:
     - assets/icons/right_arrow2.png
     - assets/icons/add_icon.png
     - assets/workout_icons/
+    - assets/group_icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -98,13 +100,21 @@ flutter:
   fonts:
     - family: Jaapokki
       fonts:
-        - asset: assets/fonts/Jaapokki-Regular.otf
+        - asset: assets/fonts/Jaapokki/Jaapokki-Regular.otf
     - family: JaapokkiEnhance
       fonts:
-        - asset: assets/fonts/Jaapokkienchance-Regular.otf
+        - asset: assets/fonts/Jaapokki/Jaapokkienchance-Regular.otf
     - family: JaapokkiSubtract
       fonts:
-        - asset: assets/fonts/Jaapokkisubtract-Regular.otf
+        - asset: assets/fonts/Jaapokki/Jaapokkisubtract-Regular.otf
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato/Lato-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Lato/Lato-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Lato/Lato-Regular.ttf
+          weight: 400
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 class Profile {
+  final int? id;
   String name;
   int age;
   double weight;
@@ -8,6 +9,7 @@ class Profile {
   DateTime date;
 
   Profile({
+    this.id,
     required this.name,
     required this.age,
     required this.weight,
@@ -17,6 +19,7 @@ class Profile {
 
   Map<String, dynamic> toMap() {
     return {
+      'id' : id,
       'name': name,
       'age': age,
       'weight': weight,
@@ -27,6 +30,7 @@ class Profile {
 
   factory Profile.fromMap(Map<String, dynamic> map) {
     return Profile(
+      id: map['id'] ?? 0,
       name: map['name'],
       age: map['age'],
       weight: map['weight'],

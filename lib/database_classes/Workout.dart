@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'ExerciseController.dart';
 
 class Workout {
+  final int? id;
   late List<ExerciseController> exercises;
   DateTime date;
   int intensity;
@@ -11,6 +12,7 @@ class Workout {
   Duration time;
 
   Workout({
+    this.id,
     required this.exercises,
     required this.date,
     required this.intensity,
@@ -21,6 +23,7 @@ class Workout {
 
   Map<String, dynamic> toMap() {
     return {
+      'id' : id,
       'exercises': jsonEncode(exercises.map((e) => e.toMap()).toList()), // Zapisujemy jako JSON
       'date': date.toIso8601String(),
       'intensity': intensity,
@@ -32,6 +35,7 @@ class Workout {
 
   factory Workout.fromMap(Map<String, dynamic> map) {
     return Workout(
+      id: map['id'] ?? 0,
       exercises: List<ExerciseController>.from((jsonDecode(map['exercises']) as List).map((e) => ExerciseController.fromMap(e))),
       date: DateTime.parse(map['date']),
       intensity: map['intensity'],
