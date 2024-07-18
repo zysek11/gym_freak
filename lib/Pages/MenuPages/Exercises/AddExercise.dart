@@ -336,10 +336,10 @@ class _AddExerciseState extends State<AddExercise> {
                         options: _mapGroupsToValueItems(groups),
                         maxItems: 2,
                         selectionType: SelectionType.multi,
-                        chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                        chipConfig: const ChipConfig(wrapType: WrapType.wrap,backgroundColor: Color(0xFF2A8CBB)),
                         dropdownHeight: 300,
                         optionTextStyle: const TextStyle(fontSize: 16),
-                        selectedOptionIcon: const Icon(Icons.check_circle),
+                        selectedOptionIcon: const Icon(Icons.check_circle,color: Color(0xFF2A8CBB),),
                       ),
                     ),
                     Padding(

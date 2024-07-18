@@ -58,6 +58,7 @@ class DatabaseHelper {
         CREATE TABLE groups (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT,
+          iconPath TEXT,
           exercises TEXT
         )
       ''');
@@ -170,6 +171,16 @@ class DatabaseHelper {
       'groups',
       group.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateGroup(Groups group) async {
+    final db = await database;
+    await db.update(
+      'groups',
+      group.toMap(),
+      where: 'id = ?',
+      whereArgs: [group.id],
     );
   }
 
