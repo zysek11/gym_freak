@@ -54,7 +54,7 @@ class _AddExerciseState extends State<AddExercise> {
   }
 
   void loadData() {
-    selectedImage = widget.exercise!.iconPath;
+    selectedImage = removeL(widget.exercise!.iconPath);
     selectedImageIndex = getImageIndex(selectedImage);
     name_tec.text = widget.exercise!.name;
     selectedCategory = widget.exercise!.type;
@@ -95,6 +95,10 @@ class _AddExerciseState extends State<AddExercise> {
     setState(() {
       check_applic = !value!;
     });
+  }
+
+  String removeL(String input) {
+    return input.replaceAll(RegExp('[Ll]'), '');
   }
 
   Future<void> addExercise() async {

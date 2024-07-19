@@ -154,7 +154,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
 
   Future<void> _removeGroup(int id) async{
     await DatabaseHelper().deleteGroup(id);
-    _refreshExercises();
+    _refreshGroups();
   }
 
   Future<List<Groups>> _loadGroups() async {
@@ -326,6 +326,9 @@ class _ExercisesPageState extends State<ExercisesPage> {
                           setState(() {
                             selected_option = newValue!;
                             _refreshExercises();
+                            if(tec_search.text.isNotEmpty){
+                              _filterExercises();
+                            }
                           });
                         },
                         items: options.map<DropdownMenuItem<String>>((String value) {
@@ -346,7 +349,10 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         onChanged: (String? newValue) {
                           setState(() {
                             selected_optionB = newValue!;
-                            _refreshExercises();
+                            _refreshGroups();
+                            if(tec_search.text.isNotEmpty){
+                              _filterGroups();
+                            }
                           });
                         },
                         items: optionsB.map<DropdownMenuItem<String>>((String value) {
@@ -372,6 +378,9 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         );
                         if (result != null) {
                           _refreshExercises();
+                          if(tec_search.text.isNotEmpty){
+                            _filterExercises();
+                          }
                         }
                       }
                       else{
@@ -382,6 +391,9 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         );
                         if (result != null) {
                           _refreshGroups();
+                          if(tec_search.text.isNotEmpty){
+                            _filterGroups();
+                          }
                         }
                       }
                     },
@@ -778,7 +790,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                               color: Colors
                                                                   .grey.shade500),
                                                           onPressed: () {
-                                                            _showDeleteConfirmationDialog(context,true, group.id!);
+                                                            _showDeleteConfirmationDialog(context,false, group.id!);
                                                           },
                                                         ),
                                                       ),

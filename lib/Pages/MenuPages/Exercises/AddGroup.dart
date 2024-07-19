@@ -53,10 +53,14 @@ class _AddGroupState extends State<AddGroup> {
   }
 
   void loadData(){
-    selectedImage = widget.group!.iconPath;
+    selectedImage = removeL(widget.group!.iconPath);
     selectedImageIndex = getImageIndex(selectedImage);
     name_tec.text = widget.group!.name;
     exercises = widget.group!.exercises;
+  }
+
+  String removeL(String input) {
+    return input.replaceAll(RegExp('[Ll]'), '');
   }
 
   Future<void> addGroup() async {
