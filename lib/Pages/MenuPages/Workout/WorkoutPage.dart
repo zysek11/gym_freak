@@ -6,6 +6,7 @@ import '../../../Language/LanguageProvider.dart';
 import '../../../Theme/DarkThemeProvider.dart';
 import '../../../Theme/Styles.dart';
 import '../../../database_classes/Profile.dart';
+import 'Begin/PickWorkout.dart';
 
 class WorkoutPage extends StatefulWidget {
   const WorkoutPage({super.key});
@@ -127,7 +128,11 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  // Your button action here
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>  PickWorkout()),
+                                  );
                                 },
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
