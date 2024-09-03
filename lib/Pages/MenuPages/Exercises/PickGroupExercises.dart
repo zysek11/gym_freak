@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gym_freak/database_classes/Exercise.dart';
+import 'package:gym_freak/database_classes/Group.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import '../../../database_classes/DatabaseHelper.dart';
 
 class PickGroupExercises extends StatefulWidget {
-  final Iterable<int> editables;
-  const PickGroupExercises({super.key, required this.editables});
+  final Iterable<int>? editables;
+  bool oneTimeW;
+  PickGroupExercises({super.key, required this.oneTimeW, this.editables});
 
   @override
   State<PickGroupExercises> createState() => _PickGroupExercisesState();
@@ -76,9 +78,11 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
     });
   }
 
-  void _initiateSelectedExercises(){
-    for(int id in widget.editables){
-      selectedExercises[id] = id;
+  void _initiateSelectedExercises() {
+    if (widget.editables != null) {
+      for (int id in widget.editables!) {
+        selectedExercises[id] = id;
+      }
     }
   }
 
@@ -282,7 +286,14 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
                   List<Exercise> selectedExercisesList = allExercises
                       .where((exercise) => selectedExercises.values.contains(exercise.id))
                       .toList();
-                  Navigator.pop(context, selectedExercisesList);
+                  if(widget.oneTimeW == false){
+                    Navigator.pop(context, selectedExercisesList);
+                  }
+                  else{
+                    Groups ot_group = Groups(name: "Temporary group",
+                        iconPath: 'assets/group_icons/typeL0.png', exercises: selectedExercisesList);
+                    Navigator.pop(context, ot_group);
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),

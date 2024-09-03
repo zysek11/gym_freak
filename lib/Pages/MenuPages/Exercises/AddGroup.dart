@@ -6,7 +6,7 @@ import '../../../database_classes/DatabaseHelper.dart';
 import '../../../database_classes/Group.dart';
 
 class AddGroup extends StatefulWidget {
-  final bool edit;
+  final int edit;
   final Groups? group;
 
   const AddGroup({super.key,required this.edit, this.group});
@@ -32,7 +32,7 @@ class _AddGroupState extends State<AddGroup> {
     Iterable<int> exerciseIds = exercises.map((exercise) => exercise.id!).toList();
      final result = await Navigator.push(
        context,
-       MaterialPageRoute(builder: (context) => PickGroupExercises(editables: exerciseIds,)), // AddExercisePage to strona dodawania ćwiczenia
+       MaterialPageRoute(builder: (context) => PickGroupExercises(oneTimeW: false,editables: exerciseIds,)), // AddExercisePage to strona dodawania ćwiczenia
      );
 
      if (result != null) {
@@ -64,7 +64,7 @@ class _AddGroupState extends State<AddGroup> {
   }
 
   Future<void> addGroup() async {
-    if (widget.edit) {
+    if (widget.edit == 0) {
       Groups group = Groups(
           id: widget.group!.id,
           name: name_tec.text,
@@ -72,7 +72,7 @@ class _AddGroupState extends State<AddGroup> {
           exercises: exercises
       );
       await DatabaseHelper().updateGroup(group);
-    } else {
+    } else  {
       Groups group = Groups(
           name: name_tec.text,
           iconPath: images[selectedImageIndex],
@@ -87,7 +87,7 @@ class _AddGroupState extends State<AddGroup> {
     super.initState();
     selectedImage = 'assets/group_icons/type0.png';
     selectedImageIndex = 0;
-    if(widget.edit){
+    if(widget.edit == 0){
       loadData();
     }
   }
@@ -262,7 +262,7 @@ class _AddGroupState extends State<AddGroup> {
                     if (name_tec.text.isNotEmpty && exercises.isNotEmpty) {
                       await addGroup();
                       if (mounted) {
-                        Navigator.pop(context, true);
+                          Navigator.pop(context, true);
                       }
                     } else {
                       const snackBar = SnackBar(
@@ -282,7 +282,7 @@ class _AddGroupState extends State<AddGroup> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          widget.edit ? "EDIT GROUP" : 'ADD GROUP',
+                          widget.edit == 0 ? "EDIT GROUP" : 'ADD GROUP',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 25,

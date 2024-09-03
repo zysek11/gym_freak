@@ -1,17 +1,26 @@
 import 'dart:convert';
+import 'ExerciseWrapper.dart';
 
-import 'ExerciseController.dart';
+abstract class Cloneable {
+  Workout clone();
+}
 
 class Workout {
   final int? id;
-  late List<ExerciseController> exercises;
+  late List<ExerciseWrapper> exercises;
   DateTime date;
-  int intensity;
-  int satisfaction;
-  String comment;
-  Duration time;
+  late int intensity;
+  late int satisfaction;
+  late String comment;
+  late Duration time;
 
-  Workout({
+  Workout.temporary({
+    this.id,
+    required this.exercises,
+    required this.date,
+  });
+
+  Workout.full({
     this.id,
     required this.exercises,
     required this.date,
@@ -34,9 +43,9 @@ class Workout {
   }
 
   factory Workout.fromMap(Map<String, dynamic> map) {
-    return Workout(
+    return Workout.full(
       id: map['id'] ?? 0,
-      exercises: List<ExerciseController>.from((jsonDecode(map['exercises']) as List).map((e) => ExerciseController.fromMap(e))),
+      exercises: List<ExerciseWrapper>.from((jsonDecode(map['exercises']) as List).map((e) => ExerciseWrapper.fromMap(e))),
       date: DateTime.parse(map['date']),
       intensity: map['intensity'],
       satisfaction: map['satisfaction'],

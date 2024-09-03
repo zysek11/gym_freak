@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_freak/Controllers/GroupsController.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/WorkoutPage.dart';
 import 'package:gym_freak/Pages/StarterPages/Starter1.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as Path;
 
+import '../Controllers/ExercisesController.dart';
 import '../Language/LanguageProvider.dart';
 import '../Pages/MenuPages/MainPage.dart';
 import '../Theme/DarkThemeProvider.dart';
@@ -52,6 +54,8 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => themeChangeProvider),
         ChangeNotifierProvider(create: (_) => languageProvider),
+        ChangeNotifierProvider(create: (context) => ExercisesManager.eManager),
+        ChangeNotifierProvider(create: (context) => GroupsManager.gManager),
       ],
       child: Consumer2<DarkThemeProvider, LanguageProvider>(
         builder: (context, themeValue, langValue, child) {

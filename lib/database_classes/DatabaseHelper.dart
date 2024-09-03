@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'Exercise.dart';
-import 'ExerciseController.dart';
+import 'ExerciseWrapper.dart';
 import 'Group.dart';
 import 'Workout.dart';
 import 'Profile.dart';
@@ -113,7 +113,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> insertExerciseController(ExerciseController controller) async {
+  Future<void> insertExerciseController(ExerciseWrapper controller) async {
     final db = await database;
     await db.insert(
       'exercise_controllers',
@@ -122,11 +122,11 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<ExerciseController>> getExerciseControllers() async {
+  Future<List<ExerciseWrapper>> getExerciseControllers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('exercise_controllers');
     return List.generate(maps.length, (i) {
-      return ExerciseController.fromMap(maps[i]);
+      return ExerciseWrapper.fromMap(maps[i]);
     });
   }
 

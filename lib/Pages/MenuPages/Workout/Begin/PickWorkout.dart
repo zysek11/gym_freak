@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:gym_freak/Pages/MenuPages/Exercises/PickGroupGroups.dart';
+import '../../../../Controllers/GroupsController.dart';
 import '../../../../database_classes/DatabaseHelper.dart';
 import '../../../../database_classes/Exercise.dart';
 import '../../../../database_classes/Group.dart';
+import '../../Exercises/AddGroup.dart';
+import '../../Exercises/PickGroupExercises.dart';
+import 'PickType.dart';
 
 class PickWorkout extends StatefulWidget {
   const PickWorkout({super.key});
@@ -20,13 +24,53 @@ class _PickWorkoutState extends State<PickWorkout> {
   @override
   void initState() {
     super.initState();
-    pickedGroup = getGroup(0);
+    pickedGroup = getFirstGroup();
   }
 
   Future<Groups> getGroup(int index) async {
-    List<Groups> groups = await DatabaseHelper().getGroups();
+    await GroupsManager.gManager.initiateOrClearGroups(null);
+    List<Groups> groups = await GroupsManager.gManager.groups;
     if (groups.isNotEmpty) {
-      return groups[index];
+      try {
+        Groups group = groups.firstWhere((group) => group.id == index);
+        return group;
+      } catch (e) {
+        throw Exception('Group with id $index not found');
+      }
+    } else {
+      throw Exception('No groups found');
+    }
+  }
+
+  Future<Groups> getFirstGroup() async {
+    await GroupsManager.gManager.initiateOrClearGroups(null);
+    List<Groups> groups = await GroupsManager.gManager.groups;
+    if (groups.isNotEmpty) {
+      return groups[0];
+    } else {
+      throw Exception('No groups found');
+    }
+  }
+
+  void getOneTimeGroup(List<Exercise> listE) async{
+    Iterable<int> exerciseIds = listE.map((exercise) => exercise.id!);
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PickGroupExercises(oneTimeW: true, editables: exerciseIds,)), // AddExercisePage to strona dodawania ćwiczenia
+    );
+
+    if (result != null) {
+      setState(() {
+        pickedGroup = Future.value(result); // Dodawanie nowego ćwiczenia do listy
+      });
+    }
+  }
+
+  Future<Groups> getLatestGroup() async {
+    await GroupsManager.gManager.initiateOrClearGroups(null);
+    List<Groups> groups = await GroupsManager.gManager.groups;
+    if (groups.isNotEmpty) {
+      return groups.last;
     } else {
       throw Exception('No groups found');
     }
@@ -67,195 +111,210 @@ class _PickWorkoutState extends State<PickWorkout> {
                   int series = group.exercises.length * 3;
                   int estimatedLeft = series * 3;
                   int estimatedRight = series * 4;
-                  return Container(
-                    padding: EdgeInsets.only(top: 8,bottom: 15,left: 15,right: 15),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                group.name,
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Lato',
+                  return GestureDetector(
+                    onTap: (){
+                      setState(() {
+                        isSelected = !isSelected;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.only(top: 8,bottom: 15,left: 15,right: 15),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(width: 2,color: Colors.black),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  group.name,
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Lato',
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 10,),
-                            GestureDetector(
-                              onTap: (){
-                                setState(() {
-                                  isSelected = !isSelected;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
+                              SizedBox(width: 10,),
+                              GestureDetector(
+                                onTap: (){
+                                  setState(() {
+                                    isSelected = !isSelected;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Color(0xFF2A8CBB)
+                                          : Colors.black,
+                                      width: 2,
+                                    ),
                                     color: isSelected
                                         ? Color(0xFF2A8CBB)
-                                        : Colors.black,
-                                    width: 2,
+                                        : Colors.transparent,
                                   ),
-                                  color: isSelected
-                                      ? Color(0xFF2A8CBB)
-                                      : Colors.transparent,
+                                  width: 35,
+                                  height: 35,
+                                  child: isSelected
+                                      ? Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 24,
+                                  )
+                                      : null,
                                 ),
-                                width: 35,
-                                height: 35,
-                                child: isSelected
-                                    ? Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 24,
-                                )
-                                    : null,
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                        Image.asset(
-                          removeL(group.iconPath),
-                          width: 128,
-                          height: 128,
-                          fit: BoxFit.cover,
-                        ),
-                        SizedBox(height: 25,),
-                        Row(
-                          children: [
-                            Image.asset(
-                              "assets/icons/clock.png",
-                              width: 32,
-                              height: 32,
-                              fit: BoxFit.cover,
-                            ),
-                            SizedBox(width: 25,),
-                            Text("Around ${estimatedLeft}-${estimatedRight} minutes",
-                              style: TextStyle(fontSize: 21,fontWeight: FontWeight.bold,),)
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Image.asset(
-                              "assets/icons/weights.png",
-                              width: 32,
-                              height: 32,
-                              fit: BoxFit.cover,
-                            ),
-                            SizedBox(width: 25,),
-                            Text("${group.exercises.length} exercises",
-                              style: TextStyle(fontSize: 21,fontWeight: FontWeight.bold,),),
-                          ],
-                        ),
-                        SizedBox(height: 25,),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: const Color(0xFF2A8CBB), backgroundColor: Colors.white, // button text color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12), // button border radius
-                                side: BorderSide(color: Colors.black, width: 2),
+                            ],
+                          ),
+                          SizedBox(height: 25,),
+                          Image.asset(
+                            removeL(group.iconPath),
+                            width: 128,
+                            height: 128,
+                            fit: BoxFit.cover,
+                          ),
+                          SizedBox(height: 25,),
+                          Row(
+                            children: [
+                              Image.asset(
+                                "assets/icons/clock.png",
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
                               ),
-                            ),
-                            onPressed: () {
-                              //Navigator.push(
-                              //  context,
-                              //  MaterialPageRoute(
-                              //      builder: (context) =>  PickWorkout()),
-                              //);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                'Choose from other groups',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 21,
-                                  fontFamily: 'Jaapokki',
-                                  // button text color
+                              SizedBox(width: 25,),
+                              Text("Around ${estimatedLeft}-${estimatedRight} minutes",
+                                style: TextStyle(fontSize: 21,fontWeight: FontWeight.bold,),)
+                            ],
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              Image.asset(
+                                "assets/icons/weights.png",
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
+                              ),
+                              SizedBox(width: 25,),
+                              Text(group.exercises.length < 2 ? "${group.exercises.length} exercise":
+                              "${group.exercises.length} exercises",
+                                style: TextStyle(fontSize: 21,fontWeight: FontWeight.bold,),),
+                            ],
+                          ),
+                          SizedBox(height: 25,),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 55,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: const Color(0xFF2A8CBB), backgroundColor: Colors.white, // button text color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12), // button border radius
+                                  side: BorderSide(color: Colors.black, width: 2),
+                                ),
+                              ),
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>  PickGroupGroups()),
+                                );
+                                if (result != null) {
+                                  setState(() {
+                                    pickedGroup =  getGroup(result);
+                                  });
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 5.0),
+                                child: Text(
+                                  'Choose from other groups',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21,
+                                    fontFamily: 'Jaapokki',
+                                    // button text color
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 15,),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: const Color(0xFF2A8CBB), backgroundColor: Colors.white, // button text color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12), // button border radius
-                                side: BorderSide(color: Colors.black, width: 2),
+                          SizedBox(height: 15,),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 55,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: const Color(0xFF2A8CBB), backgroundColor: Colors.white, // button text color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12), // button border radius
+                                  side: BorderSide(color: Colors.black, width: 2),
+                                ),
                               ),
-                            ),
-                            onPressed: () {
-                              //Navigator.push(
-                              //  context,
-                              //  MaterialPageRoute(
-                              //      builder: (context) =>  PickWorkout()),
-                              //);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                'Create a one-time workout',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 21,
-                                  fontFamily: 'Jaapokki',
-                                  // button text color
+                              onPressed: () {
+                                getOneTimeGroup(group.exercises);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 5.0),
+                                child: Text(
+                                  'Create a one-time workout',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21,
+                                    fontFamily: 'Jaapokki',
+                                    // button text color
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 15,),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: const Color(0xFF2A8CBB), backgroundColor: Colors.white, // button text color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12), // button border radius
-                                side: BorderSide(color: Colors.black, width: 2),
+                          SizedBox(height: 15,),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 55,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: const Color(0xFF2A8CBB), backgroundColor: Colors.white, // button text color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12), // button border radius
+                                  side: BorderSide(color: Colors.black, width: 2),
+                                ),
                               ),
-                            ),
-                            onPressed: () {
-                              //Navigator.push(
-                              //  context,
-                              //  MaterialPageRoute(
-                              //      builder: (context) =>  PickWorkout()),
-                              //);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                'Create a new workout group',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 21,
-                                  fontFamily: 'Jaapokki',
-                                  // button text color
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>  AddGroup(edit: 1)),
+                                );
+                                if (result != null) {
+                                  setState(() {
+                                    pickedGroup = getLatestGroup();
+                                  });
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 5.0),
+                                child: Text(
+                                  'Create a new workout group',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21,
+                                    fontFamily: 'Jaapokki',
+                                    // button text color
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -273,13 +332,32 @@ class _PickWorkoutState extends State<PickWorkout> {
                     side: BorderSide(color: Colors.black, width: 2),
                   ),
                 ),
-                onPressed: () {
-                  //Navigator.push(
-                  //  context,
-                  //  MaterialPageRoute(
-                  //      builder: (context) =>  PickWorkout()),
-                  //);
+                // Zmodyfikowana część kodu
+                onPressed: () async {
+                  final Groups selectedGroup = await pickedGroup; // Czekamy na zakończenie Future
+                  if(isSelected){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PickType(pg: selectedGroup), // Przekazanie obiektu Groups do PickType
+                      ),
+                    );
+                  }
+                  else{
+                    const snackBar = SnackBar(
+                      content: Text(
+                        'Remember to select exercise before going to the next step!',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      duration: Duration(seconds: 2),
+                      backgroundColor: Color(0xFFFFFFFF),
+                    );
+                    if(context.mounted){
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                  }
                 },
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

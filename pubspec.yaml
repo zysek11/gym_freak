@@ -85,6 +85,7 @@ flutter:
     - assets/icons/weights.png
     - assets/icons/right_arrow2.png
     - assets/icons/add_icon.png
+    - assets/icons/exit.png
     - assets/workout_icons/
     - assets/group_icons/
 

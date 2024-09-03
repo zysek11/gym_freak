@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'Exercise.dart';
 
-class ExerciseController {
+class ExerciseWrapper {
   final int? id;
   Exercise exercise;
   int series;
   List<int> weights;
   List<int> repetitions;
 
-  ExerciseController({
+  ExerciseWrapper({
     this.id,
     required this.exercise,
     required this.series,
@@ -26,8 +26,8 @@ class ExerciseController {
     };
   }
 
-  factory ExerciseController.fromMap(Map<String, dynamic> map) {
-    return ExerciseController(
+  factory ExerciseWrapper.fromMap(Map<String, dynamic> map) {
+    return ExerciseWrapper(
       id: map['id'] ?? 0,
       exercise: Exercise.fromMap(jsonDecode(map['exercise'])), // Odczytujemy z JSON
       series: map['series'],
