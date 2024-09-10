@@ -28,7 +28,7 @@ class _PickWorkoutState extends State<PickWorkout> {
   }
 
   Future<Groups> getGroup(int index) async {
-    await GroupsManager.gManager.initiateOrClearGroups(null);
+    await GroupsManager.gManager.initiateOrClearGroups(null,"A-Z");
     List<Groups> groups = await GroupsManager.gManager.groups;
     if (groups.isNotEmpty) {
       try {
@@ -43,7 +43,7 @@ class _PickWorkoutState extends State<PickWorkout> {
   }
 
   Future<Groups> getFirstGroup() async {
-    await GroupsManager.gManager.initiateOrClearGroups(null);
+    await GroupsManager.gManager.initiateOrClearGroups(null,"A-Z");
     List<Groups> groups = await GroupsManager.gManager.groups;
     if (groups.isNotEmpty) {
       return groups[0];
@@ -67,7 +67,7 @@ class _PickWorkoutState extends State<PickWorkout> {
   }
 
   Future<Groups> getLatestGroup() async {
-    await GroupsManager.gManager.initiateOrClearGroups(null);
+    await GroupsManager.gManager.initiateOrClearGroups(null,"A-Z");
     List<Groups> groups = await GroupsManager.gManager.groups;
     if (groups.isNotEmpty) {
       return groups.last;
@@ -264,7 +264,7 @@ class _PickWorkoutState extends State<PickWorkout> {
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 5.0),
                                 child: Text(
-                                  'Create a one-time workout',
+                                  'Edit exercises for a workout',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 21,
@@ -291,7 +291,7 @@ class _PickWorkoutState extends State<PickWorkout> {
                                 final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>  AddGroup(edit: 1)),
+                                      builder: (context) =>  AddGroup(edit: false)),
                                 );
                                 if (result != null) {
                                   setState(() {
@@ -335,7 +335,7 @@ class _PickWorkoutState extends State<PickWorkout> {
                 // Zmodyfikowana część kodu
                 onPressed: () async {
                   final Groups selectedGroup = await pickedGroup; // Czekamy na zakończenie Future
-                  if(isSelected){
+                  if(isSelected && context.mounted){
                     Navigator.push(
                       context,
                       MaterialPageRoute(

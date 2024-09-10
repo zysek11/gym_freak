@@ -5,10 +5,11 @@ class ExerciseWrapper {
   final int? id;
   Exercise exercise;
   int series;
-  List<int> weights;
-  List<int> repetitions;
+  List<int>? weights; // Używamy opcjonalnych typów
+  List<int>? repetitions; // Używamy opcjonalnych typów
 
-  ExerciseWrapper({
+  // Konstruktor Full - uwzględnia wszystkie właściwości
+  ExerciseWrapper.full({
     this.id,
     required this.exercise,
     required this.series,
@@ -16,23 +17,39 @@ class ExerciseWrapper {
     required this.repetitions,
   });
 
+  // Konstruktor Basic - ignoruje weights i repetitions
+  ExerciseWrapper.basic({
+    this.id,
+    required this.exercise,
+    required this.series,
+  })  : weights = null,
+        repetitions = null;
+
   Map<String, dynamic> toMap() {
-    return {
-      'id' : id,
-      'exercise': jsonEncode(exercise.toMap()), // Zapisujemy jako JSON
+    final map = {
+      'id': id,
+      'exercise': jsonEncode(exercise.toMap()),
       'series': series,
-      'weights': jsonEncode(weights), // Zapisujemy jako JSON
-      'repetitions': jsonEncode(repetitions), // Zapisujemy jako JSON
     };
+
+    // Dodajemy weights i repetitions tylko, gdy nie są nullem
+    if (weights != null) {
+      map['weights'] = jsonEncode(weights);
+    }
+    if (repetitions != null) {
+      map['repetitions'] = jsonEncode(repetitions);
+    }
+
+    return map;
   }
 
   factory ExerciseWrapper.fromMap(Map<String, dynamic> map) {
-    return ExerciseWrapper(
+    return ExerciseWrapper.full(
       id: map['id'] ?? 0,
-      exercise: Exercise.fromMap(jsonDecode(map['exercise'])), // Odczytujemy z JSON
+      exercise: Exercise.fromMap(jsonDecode(map['exercise'])),
       series: map['series'],
-      weights: List<int>.from(jsonDecode(map['weights'])), // Odczytujemy z JSON
-      repetitions: List<int>.from(jsonDecode(map['repetitions'])), // Odczytujemy z JSON
+      weights: map.containsKey('weights') ? List<int>.from(jsonDecode(map['weights'])) : [], // Domyślnie pusta lista, jeśli null
+      repetitions: map.containsKey('repetitions') ? List<int>.from(jsonDecode(map['repetitions'])) : [], // Domyślnie pusta lista, jeśli null
     );
   }
 }

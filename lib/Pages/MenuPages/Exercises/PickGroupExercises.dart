@@ -134,7 +134,8 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
               selectionType: SelectionType.multi,
               chipConfig: const ChipConfig(wrapType: WrapType.wrap,backgroundColor: Color(0xFF2A8CBB) ),
               dropdownHeight: 300,
-              optionTextStyle: const TextStyle(fontSize: 16),
+              selectedOptionTextColor: Color(0xFF2A8CBB),
+              optionTextStyle: const TextStyle(fontSize: 16,),
               selectedOptionIcon: const Icon(Icons.check_circle),
             ),
             Expanded(

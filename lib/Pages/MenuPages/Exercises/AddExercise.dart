@@ -390,7 +390,7 @@ class _AddExerciseState extends State<AddExercise> {
                 onPressed: () async {
                   if (name_tec.text.isNotEmpty && msc.selectedOptions.isNotEmpty) {
                     await addExercise();
-                    if (mounted) {
+                    if (context.mounted) {
                       Navigator.pop(context, true);
                     }
                   } else {

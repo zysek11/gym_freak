@@ -83,6 +83,7 @@ flutter:
     - assets/icons/right_arrow.png
     - assets/icons/clock.png
     - assets/icons/weights.png
+    - assets/icons/exercise.png
     - assets/icons/right_arrow2.png
     - assets/icons/add_icon.png
     - assets/icons/exit.png

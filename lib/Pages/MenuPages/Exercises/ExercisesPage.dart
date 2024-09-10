@@ -38,8 +38,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
   // EXERCISES FUNCTIONS ETC //
 
   Future<void> _loadExercises() async {
-    await ExercisesManager.eManager.initiateOrClearExercises(null);
-    ExercisesManager.eManager.sortExercises(selected_option);
+    await ExercisesManager.eManager.initiateOrClearExercises(null, selected_option);
   }
 
   List<Widget> _buildGroupWidgets(List<String> groupNames) {
@@ -66,7 +65,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
   // EXERCISES AND GROUPS FUNCTIONS FOR BOTH //
 
   void _showDeleteConfirmationDialog(
-      BuildContext context, bool exercise, int typeId) {
+      BuildContext context, bool exercise, int typeId, String? gname) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -106,9 +105,16 @@ class _ExercisesPageState extends State<ExercisesPage> {
                           fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.of(context).pop(); // Zamknięcie dialogu
-                    exercise
-                        ? ExercisesManager.eManager.removeExercise(typeId)
-                        : GroupsManager.gManager.removeGroup(typeId); // Usunięcie ćwiczenia
+                    if(exercise){
+                      ExercisesManager.eManager.removeExercise(typeId);
+                      ExercisesManager.eManager.sortExercises(selected_option);
+                    }
+                    else{
+                      ExercisesManager.eManager.removeGroupNamesFromExercises(gname!);
+                      GroupsManager.gManager.removeGroup(typeId);
+                      GroupsManager.gManager.sortGroups(selected_optionB);
+                    }
+                    showMore = -1;
                   },
                 ),
               ],
@@ -122,8 +128,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
   // GROUP FUNCTIONS ETC //
 
   Future<void> _loadGroups() async {
-    await GroupsManager.gManager.initiateOrClearGroups(null);
-    GroupsManager.gManager.sortGroups(selected_option);
+    await GroupsManager.gManager.initiateOrClearGroups(null, selected_optionB);
   }
 
   @override
@@ -154,18 +159,18 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         if (value.isEmpty) {
                           if (default_type == 0) {
                             ExercisesManager.eManager
-                                .initiateOrClearExercises(null);
+                                .filterExercises(tec_search.text, selected_option);
                           } else {
                             GroupsManager.gManager
-                                .initiateOrClearGroups(null);
+                                .filterGroups(tec_search.text, selected_optionB);
                           }
                         } else {
                           if (default_type == 0) {
                             ExercisesManager.eManager
-                                .initiateOrClearExercises(tec_search.text);
+                                .filterExercises(tec_search.text, selected_option);
                           } else {
                             GroupsManager.gManager
-                                .initiateOrClearGroups(tec_search.text);
+                                .filterGroups(tec_search.text, selected_optionB);
                           }
                         }
                       },
@@ -194,7 +199,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         default_type = 0;
                         showMore = -1;
                         ExercisesManager.eManager
-                            .initiateOrClearExercises(tec_search.text);
+                            .initiateOrClearExercises(tec_search.text,selected_option);
                       });
                     },
                     child: Container(
@@ -221,7 +226,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         default_type = 1;
                         showMore = -1;
                         GroupsManager.gManager
-                            .initiateOrClearGroups(tec_search.text);
+                            .initiateOrClearGroups(tec_search.text,selected_optionB);
                       });
                     },
                     child: Container(
@@ -316,19 +321,19 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         );
                         if (result != null) {
                           ExercisesManager.eManager
-                              .initiateOrClearExercises(tec_search.text);
+                              .initiateOrClearExercises(tec_search.text,selected_option);
                         }
                       } else {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => const AddGroup(
-                                    edit: 1,
+                                    edit: false,
                                   )),
                         );
                         if (result != null) {
                           GroupsManager.gManager
-                              .initiateOrClearGroups(tec_search.text);
+                              .initiateOrClearGroups(tec_search.text,selected_optionB);
                         }
                       }
                     },
@@ -411,99 +416,95 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                   SizedBox(width: 16),
                                                   // Odstęp między obrazem a tekstem
                                                   Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.max,
                                                       children: [
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          children: [
-                                                            Text(
-                                                              exercise.name,
-                                                              style: TextStyle(
-                                                                  fontSize: 20,
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontFamily:
-                                                                      'Lato',
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
+                                                        // Użycie Expanded, aby tekst dostosował się do dostępnego miejsca
+                                                        Expanded(
+                                                          child: Text(
+                                                            exercise.name,
+                                                            style: TextStyle(
+                                                              fontSize: 20,
+                                                              color: Colors.black,
+                                                              fontFamily: 'Lato',
+                                                              fontWeight: FontWeight.w400,
                                                             ),
-                                                            Spacer(),
-                                                            Icon(
-                                                              Icons
-                                                                  .keyboard_arrow_down_rounded,
-                                                              size: 22,
-                                                            )
-                                                          ],
-                                                        ),
-                                                        SizedBox(height: 20),
-                                                        // Odstęp między tytułem a podtytułem
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'type:  ',
-                                                              style: TextStyle(
-                                                                  fontSize: 16,
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontFamily:
-                                                                      'Lato',
-                                                                  letterSpacing:
-                                                                      1.8),
-                                                            ),
-                                                            Text(
-                                                              exercise.type
-                                                                  .toLowerCase(),
-                                                              style: TextStyle(
-                                                                  fontSize: 16,
-                                                                  color: Color(
-                                                                      0xFF2A8CBB),
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontFamily:
-                                                                      'Lato',
-                                                                  letterSpacing:
-                                                                      1.8),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(height: 20),
-                                                        // Odstęp między tytułem a podtytułem
-                                                        SingleChildScrollView(
-                                                          scrollDirection:
-                                                              Axis.horizontal,
-                                                          child: Wrap(
-                                                            children:
-                                                                _buildGroupWidgets(
-                                                              exercise.groupName
-                                                                  .map((group) =>
-                                                                      group
-                                                                          .toLowerCase())
-                                                                  .toList(),
-                                                            ),
+                                                            overflow: TextOverflow.ellipsis, // Dodaje elipsy, jeśli tekst jest za długi
+                                                            maxLines: 1, // Ogranicza do jednej linii
+                                                            softWrap: false,
                                                           ),
                                                         ),
+                                                        SizedBox(width: 10,),
+                                                        Icon(
+                                                          Icons.keyboard_arrow_down_rounded,
+                                                          size: 22,
+                                                        )
                                                       ],
                                                     ),
                                                   ),
                                                 ],
                                               ),
+                                              SizedBox(height: 20,),
+                                              Row(
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/icons/exercise.png",
+                                                    width: 32,
+                                                    height: 32,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 15,
+                                                  ),
+                                                  Text(
+                                                    "type:",
+                                                    style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Colors.black,
+                                                        fontFamily:
+                                                        'Lato',
+                                                        letterSpacing:
+                                                        1.8),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text(
+                                                    exercise.type
+                                                        .toLowerCase(),
+                                                    style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Colors.black,
+                                                        fontFamily:
+                                                        'Lato',
+                                                        letterSpacing:
+                                                        1.8),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 20,),
+                                              Align(
+                                                alignment: Alignment.topLeft,
+                                                child: SingleChildScrollView(
+                                                  scrollDirection:
+                                                  Axis.horizontal,
+                                                  child: Wrap(
+                                                    children:
+                                                    _buildGroupWidgets(
+                                                      exercise.groupName
+                                                          .map((group) =>
+                                                          group
+                                                              .toLowerCase())
+                                                          .toList(),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                               if (showMore == index &&
                                                   exercise
                                                       .description.isNotEmpty)
                                                 SizedBox(
-                                                  height: 20,
+                                                  height: 10,
                                                 ),
                                               Visibility(
                                                   visible: showMore == index,
@@ -561,8 +562,8 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                       ExercisesManager
                                                                           .eManager
                                                                           .initiateOrClearExercises(
-                                                                              null);
-                                                                    }
+                                                                              null,selected_option);
+                                                                        }
                                                                   },
                                                                 ),
                                                               ),
@@ -587,7 +588,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                         context,
                                                                         true,
                                                                         exercise
-                                                                            .id!);
+                                                                            .id!,null);
                                                                   },
                                                                 ),
                                                               ),
@@ -623,7 +624,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                   child: Text('Error: ${snapshot.error}'));
                             } else if (!snapshot.hasData ||
                                 snapshot.data!.isEmpty) {
-                              return Center(child: Text('No exercises found.'));
+                              return Center(child: Text('No groups found.'));
                             } else {
                               List<Groups> groups = snapshot.data!;
                               return ListView.builder(
@@ -679,21 +680,23 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                         mainAxisSize:
                                                             MainAxisSize.max,
                                                         children: [
-                                                          Text(
-                                                            group.name,
-                                                            style: TextStyle(
-                                                                fontSize: 20,
-                                                                color:
-                                                                    Colors.black,
-                                                                fontFamily:
-                                                                    'Lato',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400),
-                                                            overflow: TextOverflow
-                                                                .ellipsis,
+                                                          Expanded(
+                                                            child: Text(
+                                                              group.name,
+                                                              style: TextStyle(
+                                                                  fontSize: 20,
+                                                                  color:
+                                                                      Colors.black,
+                                                                  fontFamily:
+                                                                      'Lato',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow: TextOverflow
+                                                                  .ellipsis,
+                                                            ),
                                                           ),
-                                                          Spacer(),
+                                                          SizedBox(width: 10,),
                                                           Icon(
                                                             Icons
                                                                 .keyboard_arrow_down_rounded,
@@ -829,7 +832,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                         builder:
                                                                             (context) =>
                                                                                 AddGroup(
-                                                                                  edit: 0,
+                                                                                  edit: true,
                                                                                   group: group,
                                                                                 )),
                                                                   );
@@ -838,7 +841,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                     GroupsManager
                                                                         .gManager
                                                                         .initiateOrClearGroups(
-                                                                        null);
+                                                                        null,selected_optionB);
                                                                   }
                                                                 },
                                                               ),
@@ -861,7 +864,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                   _showDeleteConfirmationDialog(
                                                                       context,
                                                                       false,
-                                                                      group.id!);
+                                                                      group.id!, group.name);
                                                                 },
                                                               ),
                                                             ),

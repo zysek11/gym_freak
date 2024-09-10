@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_freak/Controllers/ExercisesController.dart';
 import 'package:gym_freak/Pages/MenuPages/Exercises/PickGroupExercises.dart';
 import 'package:gym_freak/database_classes/Exercise.dart';
 
@@ -6,7 +7,7 @@ import '../../../database_classes/DatabaseHelper.dart';
 import '../../../database_classes/Group.dart';
 
 class AddGroup extends StatefulWidget {
-  final int edit;
+  final bool edit;
   final Groups? group;
 
   const AddGroup({super.key,required this.edit, this.group});
@@ -64,7 +65,7 @@ class _AddGroupState extends State<AddGroup> {
   }
 
   Future<void> addGroup() async {
-    if (widget.edit == 0) {
+    if (widget.edit) {
       Groups group = Groups(
           id: widget.group!.id,
           name: name_tec.text,
@@ -80,6 +81,8 @@ class _AddGroupState extends State<AddGroup> {
       );
       await DatabaseHelper().insertGroup(group);
     }
+    await ExercisesManager.eManager.addGroupNamesToExercises(
+        exercises.map((exercise) => exercise.id!).toList(), name_tec.text);
   }
 
   @override
@@ -87,7 +90,7 @@ class _AddGroupState extends State<AddGroup> {
     super.initState();
     selectedImage = 'assets/group_icons/type0.png';
     selectedImageIndex = 0;
-    if(widget.edit == 0){
+    if(widget.edit){
       loadData();
     }
   }
@@ -261,7 +264,7 @@ class _AddGroupState extends State<AddGroup> {
                   onPressed: () async {
                     if (name_tec.text.isNotEmpty && exercises.isNotEmpty) {
                       await addGroup();
-                      if (mounted) {
+                      if (context.mounted) {
                           Navigator.pop(context, true);
                       }
                     } else {
@@ -282,7 +285,7 @@ class _AddGroupState extends State<AddGroup> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          widget.edit == 0 ? "EDIT GROUP" : 'ADD GROUP',
+                          widget.edit ? "EDIT GROUP" : 'ADD GROUP',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 25,

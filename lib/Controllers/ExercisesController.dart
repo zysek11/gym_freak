@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
-
+import 'package:flutter/material.dart';
 import '../database_classes/DatabaseHelper.dart';
 import '../database_classes/Exercise.dart';
 
-class ExercisesManager extends ChangeNotifier{
+class ExercisesManager extends ChangeNotifier {
   ExercisesManager._privateConstructor();
   static final ExercisesManager _eManager = ExercisesManager._privateConstructor();
   static ExercisesManager get eManager => _eManager;
@@ -14,22 +13,67 @@ class ExercisesManager extends ChangeNotifier{
     return _exercises;
   }
 
+  Future<void> addGroupNamesToExercises(Iterable<int> exerciseIds, String groupName) async {
+    // Pobierz wszystkie ćwiczenia z bazy danych
+    List<Exercise> exercises = await DatabaseHelper().getExercises();
+
+    // Iteruj przez każde ćwiczenie
+    for (var exercise in exercises) {
+      // Sprawdź, czy ćwiczenie zawiera nazwę grupy
+      if (exercise.groupName.contains(groupName)) {
+        // Jeśli ćwiczenie zawiera nazwę grupy, ale nie jest na liście exerciseIds, usuń nazwę grupy
+        if (!exerciseIds.contains(exercise.id)) {
+          exercise.groupName.remove(groupName);
+          // Zaktualizuj ćwiczenie w bazie danych
+          await DatabaseHelper().updateExercise(exercise);
+        }
+      } else {
+        // Jeśli ćwiczenie nie zawiera nazwy grupy, ale jest na liście exerciseIds, dodaj nazwę grupy
+        if (exerciseIds.contains(exercise.id)) {
+          exercise.groupName.add(groupName);
+          // Zaktualizuj ćwiczenie w bazie danych
+          await DatabaseHelper().updateExercise(exercise);
+        }
+      }
+      await refresh();
+    }
+  }
+
+  Future<void> removeGroupNamesFromExercises(String groupName) async {
+    // Pobierz wszystkie ćwiczenia z bazy danych
+    List<Exercise> exercises = await DatabaseHelper().getExercises();
+
+    // Iteruj przez każde ćwiczenie
+    for (var exercise in exercises) {
+      // Sprawdź, czy ćwiczenie zawiera nazwę grupy
+      if (exercise.groupName.contains(groupName)) {
+        // Usuń nazwę grupy
+        exercise.groupName.remove(groupName);
+
+        // Zaktualizuj ćwiczenie w bazie danych
+        await DatabaseHelper().updateExercise(exercise);
+      }
+    }
+    refresh();
+  }
+
+
+
+  // Funkcja odświeżająca dane z bazy
+  Future<void> refresh() async {
+    List<Exercise> exercises = await DatabaseHelper().getExercises();
+    assignData(exercises);  // Aktualizuje ćwiczenia
+  }
+
+  // Funkcja przypisująca dane i powiadamiająca listenerów
   void assignData(List<Exercise> ex) {
     _exercises = Future.value(ex);
     notifyListeners();
   }
 
-  Future<void> initiateOrClearExercises(String? tecSearch) async {
-    List<Exercise> exercises = await DatabaseHelper().getExercises();
-    if (tecSearch != null && tecSearch.isNotEmpty) {
-      filterExercises(tecSearch);
-    } else {
-      assignData(exercises);
-    }
-  }
-
+  // Funkcja sortująca dane bez ich odświeżania
   void sortExercises(String selectedOption) async {
-    List<Exercise> exercises = await this.exercises;
+    List<Exercise> exercises = await this.exercises; // Używa już załadowanych danych
     switch (selectedOption) {
       case "A-Z":
         exercises.sort((a, b) => a.name.compareTo(b.name));
@@ -41,20 +85,40 @@ class ExercisesManager extends ChangeNotifier{
         exercises.sort((a, b) => a.type.compareTo(b.type));
         break;
     }
-    assignData(exercises);
+    assignData(exercises);  // Przypisuje posortowane dane
   }
 
-  Future<void> filterExercises(String tecSearch) async {
+  // Funkcja filtrująca, która najpierw odświeża, potem sortuje i filtruje dane
+  Future<void> filterExercises(String tecSearch, String selectedOption) async {
+    // Odśwież dane
+    await refresh();
+
+    // Sortuj dane
+    sortExercises(selectedOption);
+
+    // Pobierz posortowane dane i zastosuj filtr
     List<Exercise> exercises = await this.exercises;
     List<Exercise> filteredExercises = exercises.where((exercise) {
       return exercise.name.contains(tecSearch) ||
           exercise.groupName.any((group) => group.contains(tecSearch));
     }).toList();
-    assignData(filteredExercises);
+
+    assignData(filteredExercises);  // Przypisuje przefiltrowane dane
   }
 
+  // Funkcja do inicjacji lub czyszczenia listy ćwiczeń
+  Future<void> initiateOrClearExercises(String? tecSearch, String selectedOption) async {
+    if (tecSearch != null && tecSearch.isNotEmpty) {
+      await filterExercises(tecSearch, selectedOption);
+    } else {
+      await refresh();
+      sortExercises(selectedOption);  // Sortuj dane, jeśli nie ma wyszukiwania
+    }
+  }
+
+  // Funkcja usuwająca ćwiczenie i odświeżająca listę ćwiczeń
   Future<void> removeExercise(int id) async {
     await DatabaseHelper().deleteExercise(id);
-    initiateOrClearExercises(null);
+    await refresh();  // Odśwież dane po usunięciu
   }
 }

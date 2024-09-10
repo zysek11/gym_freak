@@ -14,12 +14,14 @@ class Workout {
   late String comment;
   late Duration time;
 
+  // Konstruktor dla tymczasowego Workout
   Workout.temporary({
     this.id,
     required this.exercises,
     required this.date,
   });
 
+  // Konstruktor pełny dla Workout
   Workout.full({
     this.id,
     required this.exercises,
@@ -32,7 +34,7 @@ class Workout {
 
   Map<String, dynamic> toMap() {
     return {
-      'id' : id,
+      'id': id,
       'exercises': jsonEncode(exercises.map((e) => e.toMap()).toList()), // Zapisujemy jako JSON
       'date': date.toIso8601String(),
       'intensity': intensity,

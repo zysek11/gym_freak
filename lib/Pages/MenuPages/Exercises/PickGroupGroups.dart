@@ -24,7 +24,7 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
 
 
   Future<void> _loadGroups() async {
-    await GroupsManager.gManager.initiateOrClearGroups(null);
+    await GroupsManager.gManager.initiateOrClearGroups(null,"A-Z");
   }
 
 
