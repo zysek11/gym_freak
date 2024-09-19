@@ -5,7 +5,7 @@ class ExerciseWrapper {
   final int? id;
   Exercise exercise;
   int series;
-  List<int>? weights; // Używamy opcjonalnych typów
+  List<double>? weights; // Używamy opcjonalnych typów
   List<int>? repetitions; // Używamy opcjonalnych typów
 
   // Konstruktor Full - uwzględnia wszystkie właściwości
@@ -48,7 +48,7 @@ class ExerciseWrapper {
       id: map['id'] ?? 0,
       exercise: Exercise.fromMap(jsonDecode(map['exercise'])),
       series: map['series'],
-      weights: map.containsKey('weights') ? List<int>.from(jsonDecode(map['weights'])) : [], // Domyślnie pusta lista, jeśli null
+      weights: map.containsKey('weights') ? List<double>.from(jsonDecode(map['weights'])) : [], // Domyślnie pusta lista, jeśli null
       repetitions: map.containsKey('repetitions') ? List<int>.from(jsonDecode(map['repetitions'])) : [], // Domyślnie pusta lista, jeśli null
     );
   }

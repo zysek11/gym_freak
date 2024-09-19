@@ -65,7 +65,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
   // EXERCISES AND GROUPS FUNCTIONS FOR BOTH //
 
   void _showDeleteConfirmationDialog(
-      BuildContext context, bool exercise, int typeId, String? gname) {
+      BuildContext context, Exercise? exercise, Groups? groups) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -75,12 +75,12 @@ class _ExercisesPageState extends State<ExercisesPage> {
             child: Text(
               "Confirm Deletion",
               style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 30 // Ustawienie koloru na niebieski
-                  ),
+                color: Colors.blue,
+                fontSize: 30, // Ustawienie koloru na niebieski
+              ),
             ),
           ),
-          content: exercise
+          content: exercise != null
               ? Text("Are you sure you want to delete this exercise?")
               : Text("Are you sure you want to delete this group?"),
           actions: <Widget>[
@@ -92,26 +92,33 @@ class _ExercisesPageState extends State<ExercisesPage> {
                   child: Text(
                     "Cancel",
                     style: TextStyle(
-                        color: Color(0xFF2A8CBB), fontWeight: FontWeight.bold),
+                      color: Color(0xFF2A8CBB),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop(); // Zamknięcie dialogu
                   },
                 ),
                 TextButton(
-                  child: Text("Delete",
-                      style: TextStyle(
-                          color: Color(0xFF2A8CBB),
-                          fontWeight: FontWeight.bold)),
+                  child: Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Color(0xFF2A8CBB),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop(); // Zamknięcie dialogu
-                    if(exercise){
-                      ExercisesManager.eManager.removeExercise(typeId);
+                    if (exercise != null) {
+                      GroupsManager.gManager.updateExerciseGroups(<int>[], exercise);
+                      ExercisesManager.eManager.removeExercise(exercise.id!);
                       ExercisesManager.eManager.sortExercises(selected_option);
-                    }
-                    else{
-                      ExercisesManager.eManager.removeGroupNamesFromExercises(gname!);
-                      GroupsManager.gManager.removeGroup(typeId);
+                    } else if (groups != null) {
+                      // Usuwanie grupy z wszystkich ćwiczeń
+                      ExercisesManager.eManager.removeGroupNamesFromExercises(groups.id!);
+                      // Usuwanie grupy z bazy danych
+                      GroupsManager.gManager.removeGroup(groups.id!);
                       GroupsManager.gManager.sortGroups(selected_optionB);
                     }
                     showMore = -1;
@@ -124,6 +131,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
       },
     );
   }
+
 
   // GROUP FUNCTIONS ETC //
 
@@ -445,57 +453,64 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                 ],
                                               ),
                                               SizedBox(height: 20,),
-                                              Row(
-                                                children: [
-                                                  Image.asset(
-                                                    "assets/icons/exercise.png",
-                                                    width: 32,
-                                                    height: 32,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  Text(
-                                                    "type:",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        color: Colors.black,
-                                                        fontFamily:
-                                                        'Lato',
-                                                        letterSpacing:
-                                                        1.8),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Text(
-                                                    exercise.type
-                                                        .toLowerCase(),
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        color: Colors.black,
-                                                        fontFamily:
-                                                        'Lato',
-                                                        letterSpacing:
-                                                        1.8),
-                                                  ),
-                                                ],
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal:  16.0),
+                                                child: Row(
+                                                  children: [
+                                                    Image.asset(
+                                                      "assets/icons/exercise.png",
+                                                      width: 32,
+                                                      height: 32,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 24,
+                                                    ),
+                                                    Text(
+                                                      "type:",
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          color: Colors.black,
+                                                          fontFamily:
+                                                          'Lato',
+                                                          letterSpacing:
+                                                          1.8),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      exercise.type
+                                                          .toLowerCase(),
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          color: Colors.black,
+                                                          fontFamily:
+                                                          'Lato',
+                                                          letterSpacing:
+                                                          1.8),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                               SizedBox(height: 20,),
-                                              Align(
-                                                alignment: Alignment.topLeft,
-                                                child: SingleChildScrollView(
-                                                  scrollDirection:
-                                                  Axis.horizontal,
-                                                  child: Wrap(
-                                                    children:
-                                                    _buildGroupWidgets(
-                                                      exercise.groupName
-                                                          .map((group) =>
-                                                          group
-                                                              .toLowerCase())
-                                                          .toList(),
+                                              if(exercise.groups != null)
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                                child: Align(
+                                                  alignment: Alignment.topLeft,
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection:
+                                                    Axis.horizontal,
+                                                    child: Wrap(
+                                                      children:
+                                                      _buildGroupWidgets(
+                                                        exercise.groups
+                                                            !.map((group) =>
+                                                            group.name
+                                                                .toLowerCase())
+                                                            .toList(),
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
@@ -586,9 +601,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                       () {
                                                                     _showDeleteConfirmationDialog(
                                                                         context,
-                                                                        true,
-                                                                        exercise
-                                                                            .id!,null);
+                                                                        exercise,null);
                                                                   },
                                                                 ),
                                                               ),
@@ -634,6 +647,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                   int series = group.exercises.length * 3;
                                   int estimatedLeft = series * 3;
                                   int estimatedRight = series * 4;
+                                  //print("id grupy " + group.name + ": "+ group.id.toString());
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12.0, vertical: 4.0),
@@ -727,7 +741,8 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                     width: 25,
                                                   ),
                                                   Text(
-                                                    "Around ${estimatedLeft}-${estimatedRight} minutes",
+                                                    series  != 0 ? "Around ${estimatedLeft}-${estimatedRight} minutes"
+                                                      : "Add exercises to calculate time",
                                                     style:
                                                         TextStyle(fontSize: 18),
                                                   )
@@ -752,11 +767,12 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                     width: 25,
                                                   ),
                                                   Text(
-                                                    group.exercises.length < 2
-                                                        ? "${group.exercises.length} exercise"
-                                                        : "${group.exercises.length} exercises",
-                                                    style:
-                                                        TextStyle(fontSize: 18),
+                                                    group.exercises.isEmpty
+                                                        ? "No exercises" // Wyświetl "No exercises" gdy liczba ćwiczeń wynosi 0
+                                                        : group.exercises.length == 1
+                                                        ? "${group.exercises.length} exercise" // Wyświetl "1 exercise", gdy liczba ćwiczeń to 1
+                                                        : "${group.exercises.length} exercises", // Wyświetl liczbę ćwiczeń, gdy jest ich więcej niż 1
+                                                    style: TextStyle(fontSize: 18),
                                                   )
                                                 ],
                                               ),
@@ -863,8 +879,8 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                                 onPressed: () {
                                                                   _showDeleteConfirmationDialog(
                                                                       context,
-                                                                      false,
-                                                                      group.id!, group.name);
+                                                                      null,
+                                                                      group);
                                                                 },
                                                               ),
                                                             ),

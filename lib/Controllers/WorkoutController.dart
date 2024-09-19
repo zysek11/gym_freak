@@ -15,7 +15,7 @@ class WorkoutController{
 
   WorkoutController(this.selectedWorkout);
 
-  void addExerciseToWorkout(Exercise e, int series, List<int> weights,
+  void addExerciseToWorkout(Exercise e, int series, List<double> weights,
       List<int> repetitions){
     selectedWorkout.exercises.add(ExerciseWrapper.full(exercise: e, series: series,
     weights: weights, repetitions: repetitions));

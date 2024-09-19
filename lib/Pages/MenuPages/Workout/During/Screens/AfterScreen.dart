@@ -23,7 +23,7 @@ class AfterExerciseScreen extends StatefulWidget {
 class _AfterExerciseScreenState extends State<AfterExerciseScreen> {
   TextEditingController tecWeights = TextEditingController();
   TextEditingController tecRepeats = TextEditingController();
-  int weight = 0;
+  double weight = 0;
   int repeats = 0;
 
   writeDataToWeight(){
@@ -125,7 +125,7 @@ class _AfterExerciseScreenState extends State<AfterExerciseScreen> {
                         keyboardType: TextInputType.number,
                         onChanged: (text) {
                           setState(() {
-                            weight = int.tryParse(text) ?? 0;
+                            weight = double.tryParse(text) ?? 0;
                           });
                         },
                         controller: tecWeights,

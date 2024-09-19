@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gym_freak/Pages/MenuPages/Exercises/PickGroupGroups.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../Controllers/GroupsController.dart';
 import '../../../../database_classes/DatabaseHelper.dart';
 import '../../../../database_classes/Exercise.dart';
@@ -18,7 +19,7 @@ class PickWorkout extends StatefulWidget {
 }
 
 class _PickWorkoutState extends State<PickWorkout> {
-  late Future<Groups> pickedGroup;
+  late Future<Groups?> pickedGroup;
   bool isSelected = false;
 
   @override
@@ -27,7 +28,7 @@ class _PickWorkoutState extends State<PickWorkout> {
     pickedGroup = getFirstGroup();
   }
 
-  Future<Groups> getGroup(int index) async {
+  Future<Groups?> getGroup(int index) async {
     await GroupsManager.gManager.initiateOrClearGroups(null,"A-Z");
     List<Groups> groups = await GroupsManager.gManager.groups;
     if (groups.isNotEmpty) {
@@ -38,31 +39,48 @@ class _PickWorkoutState extends State<PickWorkout> {
         throw Exception('Group with id $index not found');
       }
     } else {
-      throw Exception('No groups found');
+      return null;
     }
   }
 
-  Future<Groups> getFirstGroup() async {
+  Future<Groups?> getFirstGroup() async {
     await GroupsManager.gManager.initiateOrClearGroups(null,"A-Z");
     List<Groups> groups = await GroupsManager.gManager.groups;
     if (groups.isNotEmpty) {
       return groups[0];
     } else {
-      throw Exception('No groups found');
+      return null;
     }
   }
 
-  void getOneTimeGroup(List<Exercise> listE) async{
-    Iterable<int> exerciseIds = listE.map((exercise) => exercise.id!);
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => PickGroupExercises(oneTimeW: true, editables: exerciseIds,)), // AddExercisePage to strona dodawania ćwiczenia
-    );
+  void getOneTimeGroup(List<Exercise> listE, String type) async{
+    // do 1 typu ida tylko cwiczenia z grupa, do 2 wszystkie
+    Iterable<int> exerciseIds;
 
-    if (result != null) {
-      setState(() {
-        pickedGroup = Future.value(result); // Dodawanie nowego ćwiczenia do listy
-      });
+    // Sprawdzamy, czy typ to "combine", jeśli tak, to dodajemy ćwiczenia z grupą
+    if (type == "combine") {
+      exerciseIds = listE.where((exercise) => exercise.groups!.isNotEmpty).map((exercise) => exercise.id!);
+    } else {
+      // Inaczej zostawiamy listę jak jest
+      exerciseIds = listE.map((exercise) => exercise.id!);
+    }
+    if(context.mounted){
+      final result = type == "combine" ?
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>  PickGroupGroups(editables: exerciseIds,)),
+      )
+          : await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PickGroupExercises(oneTimeW: true, editables: exerciseIds,)), // AddExercisePage to strona dodawania ćwiczenia
+      );
+
+      if (result != null) {
+        setState(() {
+          pickedGroup = Future.value(result); // Dodawanie nowego ćwiczenia do listy
+        });
+      }
     }
   }
 
@@ -97,15 +115,51 @@ class _PickWorkoutState extends State<PickWorkout> {
               // button text color
             ),),
             Spacer(),
-            FutureBuilder<Groups>(
+            FutureBuilder<Groups?>(
               future: pickedGroup,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(child:
+                    Container(
+                        padding: EdgeInsets.only(top: 15,bottom: 15,left: 5,right:5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(width: 2,color: Colors.black),
+                        color: Colors.white,
+                      ),
+                        child: Column(
+                          children: [
+                            Lottie.asset("assets/animations/no_group_anim.json"),
+                            Text('Where are these groups?',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Lato',
+                              ),),
+                          ],
+                        ))
+                  );
                 } else if (!snapshot.hasData) {
-                  return Center(child: Text('No exercises found.'));
+                  return Center(child: Container(
+                      padding: EdgeInsets.only(top: 15,bottom: 15,left: 5,right:5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(width: 2,color: Colors.black),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          Lottie.asset("assets/animations/no_group_anim.json"),
+                          Text('Where are these groups?',
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Lato',
+                            ),),
+                        ],
+                      )));
                 } else {
                   Groups group = snapshot.data!;
                   int series = group.exercises.length * 3;
@@ -221,21 +275,12 @@ class _PickWorkoutState extends State<PickWorkout> {
                                 ),
                               ),
                               onPressed: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>  PickGroupGroups()),
-                                );
-                                if (result != null) {
-                                  setState(() {
-                                    pickedGroup =  getGroup(result);
-                                  });
-                                }
+                                getOneTimeGroup(group.exercises,"combine");
                               },
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 5.0),
                                 child: Text(
-                                  'Choose from other groups',
+                                  'Combine exercises from groups',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 21,
@@ -259,12 +304,12 @@ class _PickWorkoutState extends State<PickWorkout> {
                                 ),
                               ),
                               onPressed: () {
-                                getOneTimeGroup(group.exercises);
+                                getOneTimeGroup(group.exercises,"select");
                               },
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 5.0),
                                 child: Text(
-                                  'Edit exercises for a workout',
+                                  'Pick exercises for a workout',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 21,
@@ -334,12 +379,12 @@ class _PickWorkoutState extends State<PickWorkout> {
                 ),
                 // Zmodyfikowana część kodu
                 onPressed: () async {
-                  final Groups selectedGroup = await pickedGroup; // Czekamy na zakończenie Future
+                  final Groups? selectedGroup = await pickedGroup; // Czekamy na zakończenie Future
                   if(isSelected && context.mounted){
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PickType(pg: selectedGroup), // Przekazanie obiektu Groups do PickType
+                        builder: (context) => PickType(pg: selectedGroup!), // Przekazanie obiektu Groups do PickType
                       ),
                     );
                   }

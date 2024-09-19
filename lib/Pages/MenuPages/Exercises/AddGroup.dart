@@ -73,6 +73,8 @@ class _AddGroupState extends State<AddGroup> {
           exercises: exercises
       );
       await DatabaseHelper().updateGroup(group);
+      await ExercisesManager.eManager.addGroupNamesToExercises(
+          exercises.map((exercise) => exercise.id!).toList(), group);
     } else  {
       Groups group = Groups(
           name: name_tec.text,
@@ -80,9 +82,13 @@ class _AddGroupState extends State<AddGroup> {
           exercises: exercises
       );
       await DatabaseHelper().insertGroup(group);
+      if(exercises.isNotEmpty){
+        Groups? groupT = await DatabaseHelper().getLastGroup();
+        await ExercisesManager.eManager.addGroupNamesToExercises(
+            exercises.map((exercise) => exercise.id!).toList(), groupT!);
+      }
     }
-    await ExercisesManager.eManager.addGroupNamesToExercises(
-        exercises.map((exercise) => exercise.id!).toList(), name_tec.text);
+
   }
 
   @override
@@ -262,7 +268,7 @@ class _AddGroupState extends State<AddGroup> {
                     ),
                   ),
                   onPressed: () async {
-                    if (name_tec.text.isNotEmpty && exercises.isNotEmpty) {
+                    if (name_tec.text.isNotEmpty) {
                       await addGroup();
                       if (context.mounted) {
                           Navigator.pop(context, true);
@@ -270,7 +276,7 @@ class _AddGroupState extends State<AddGroup> {
                     } else {
                       const snackBar = SnackBar(
                         content: Text(
-                          'Do not forget about name and exercises!',
+                          'Do not forget about name!',
                           style: TextStyle(color: Colors.black),
                         ),
                         duration: Duration(seconds: 2),

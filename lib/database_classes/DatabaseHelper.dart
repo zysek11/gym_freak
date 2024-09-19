@@ -30,7 +30,7 @@ class DatabaseHelper {
           type TEXT,
           application INTEGER,
           iconPath TEXT,
-          groupName TEXT,
+          groups TEXT,
           description TEXT
         )
       ''');
@@ -86,12 +86,45 @@ class DatabaseHelper {
     );
   }
 
+  Future<List<Exercise>> getExercisesByIds(Iterable<int> exerciseIds) async {
+    final db = await database;
+
+    // Konwertowanie Iterable<int> na ciąg znaków rozdzielony przecinkami
+    String ids = exerciseIds.join(',');
+
+    // Pobieranie ćwiczeń, których ID są w przekazanej liście
+    final List<Map<String, dynamic>> maps = await db.query(
+      'exercises',
+      where: 'id IN ($ids)',
+    );
+
+    // Konwertowanie wyników z bazy danych na obiekty Exercise
+    return List.generate(maps.length, (i) {
+      return Exercise.fromMap(maps[i]);
+    });
+  }
+
   Future<List<Exercise>> getExercises() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('exercises');
     return List.generate(maps.length, (i) {
       return Exercise.fromMap(maps[i]);
     });
+  }
+
+  Future<Exercise?> getLastExercise() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'exercises',
+      orderBy: 'id DESC', // Sortowanie malejąco według id
+      limit: 1, // Pobieramy tylko jedno, ostatnie ćwiczenie
+    );
+
+    if (maps.isNotEmpty) {
+      return Exercise.fromMap(maps.first);
+    } else {
+      return null; // Jeśli nie ma żadnych ćwiczeń, zwróć null
+    }
   }
 
   Future<void> deleteExercise(int id) async {
@@ -190,6 +223,23 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Groups.fromMap(maps[i]);
     });
+  }
+
+  Future<Groups?> getLastGroup() async {
+    final db = await database;
+
+    // Pobierz grupę z najwyższym ID, co oznacza ostatnio dodaną grupę
+    final List<Map<String, dynamic>> maps = await db.query(
+      'groups',
+      orderBy: 'id DESC', // Sortowanie w odwrotnej kolejności według ID
+      limit: 1, // Ograniczenie do jednej grupy
+    );
+
+    if (maps.isNotEmpty) {
+      return Groups.fromMap(maps.first); // Zwróć pierwszą (i jedyną) grupę
+    } else {
+      return null; // Jeśli nie ma żadnej grupy
+    }
   }
 
   Future<void> deleteGroup(int id) async {

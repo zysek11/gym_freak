@@ -12,33 +12,54 @@ import 'Screens/SummaryScreen.dart';
 class WorkoutWidgets extends StatefulWidget {
   final Groups pg;
   final bool type;
-  const WorkoutWidgets({super.key,  required this.pg,  required this.type});
+  const WorkoutWidgets({super.key, required this.pg, required this.type});
 
   @override
   State<WorkoutWidgets> createState() => _WorkoutWidgetsState();
 }
 
 class _WorkoutWidgetsState extends State<WorkoutWidgets> {
+  TrainingState? previousState;
 
   @override
   void initState() {
+    super.initState();
+    // Ustawienie aktualnego stanu treningu
     TrainingManager.tManager.actualState = widget.type ? TrainingState.e_before : TrainingState.clean;
     TrainingManager.tManager.setOrResetData(widget.pg);
-    super.initState();
+    previousState = null; // Brak poprzedniego stanu na początku
+  }
+
+  void _onWillPop(bool shouldPop) {
+    if (previousState == null) {
+      Navigator.of(context).pop(); // Pozwalamy na wyjście z ekranu
+    } else {
+      setState(() {
+        // Cofnij do poprzedniego stanu
+        TrainingManager.tManager.actualState = previousState!;
+        previousState = null; // Resetuj poprzedni stan po cofnięciu
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<TrainingState>(
-      stream: TrainingManager.tManager.stateStream, // Zakładam, że masz strumień aktualizujący stan
-      initialData: TrainingManager.tManager.actualState,
-      builder: (context, snapshot) {
-        return TrainingManager.tManager.workoutController.loadWindow(snapshot.data!)!;
-      },
+    return PopScope(
+      canPop: true, // Umożliwia obsługę przycisku cofania
+      onPopInvoked: _onWillPop, // Callback bez Future
+      child: StreamBuilder<TrainingState>(
+        stream: TrainingManager.tManager.stateStream,
+        initialData: TrainingManager.tManager.actualState,
+        builder: (context, snapshot) {
+          // Zapisujemy aktualny stan jako poprzedni przed zmianą stanu
+          previousState = TrainingManager.tManager.actualState;
+          // Renderujemy odpowiednie okno na podstawie stanu
+          return TrainingManager.tManager.workoutController.loadWindow(snapshot.data!)!;
+        },
+      ),
     );
   }
 }
-
 class WidgetController {
 
   // Deklaracja właściwości `actualWindow` jako `Widget?`, aby mogła przyjąć wartość `null` początkowo.

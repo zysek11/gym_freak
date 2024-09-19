@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
+import '../../../Controllers/GroupsController.dart';
 import '../../../database_classes/DatabaseHelper.dart';
 import '../../../database_classes/Exercise.dart';
 import '../../../database_classes/Group.dart';
@@ -24,6 +25,8 @@ class _AddExerciseState extends State<AddExercise> {
   TextEditingController name_tec = TextEditingController();
   TextEditingController desc_tec = TextEditingController();
   late String selectedCategory;
+  bool _isLoading = true;
+  late List<Groups> groups;
 
   final List<String> images = List.generate(
     8,
@@ -42,10 +45,6 @@ class _AddExerciseState extends State<AddExercise> {
     'Other  '
   ];
 
-  bool _isLoading = true;
-
-  late List<String> groups;
-
   void initializeData() {
     check_applic = true;
     selectedImage = 'assets/workout_icons/typeL0.png';
@@ -59,30 +58,56 @@ class _AddExerciseState extends State<AddExercise> {
     name_tec.text = widget.exercise!.name;
     selectedCategory = widget.exercise!.type;
     check_applic = widget.exercise!.application == 0 ? false : true;
+
+    // Ustaw opcje dostępnych grup
     msc.setOptions(_mapGroupsToValueItems(groups));
-    msc.setSelectedOptions(_mapGroupsToValueItems(widget.exercise!.groupName));
+
+    // Znajdź tylko te grupy, które są na liście dostępnych grup
+    List<Groups> validSelectedGroups = widget.exercise!.groups!.where((group) {
+      return groups.any((g) => g.id == group.id); // Sprawdź, czy grupa z ćwiczenia istnieje w dostępnych grupach
+    }).toList();
+
+    // Debugowanie - wyświetl grupy
+    print("All groups: ${groups.map((g) => g.name).toList()}");
+    print("Valid selected groups: ${validSelectedGroups.map((g) => g.name).toList()}");
+
+    // Ustaw wybrane grupy, ale sprawdź, czy są na liście opcji
+    if (validSelectedGroups.isNotEmpty) {
+      msc.setSelectedOptions(_mapGroupsToValueItems(validSelectedGroups));
+    } else {
+      print('No valid groups found for this exercise');
+    }
+
     desc_tec.text = widget.exercise!.description;
   }
+
+
 
   Future<void> _loadGroups() async {
     List<Groups> groupList = await DatabaseHelper().getGroups();
     setState(() {
-      groups = groupList.map((group) => group.name).toList(); // Assuming Groups has a 'name' property
-      groups.add("None");
+      groups = groupList; // Używamy teraz pełnych obiektów Groups
       _isLoading = false;
     });
   }
 
-  List<ValueItem> _mapGroupsToValueItems(List<String> groups) {
-    return groups.map((group) => ValueItem(label: group, value: group)).toList();
+  List<ValueItem> _mapGroupsToValueItems(List<Groups> groups) {
+    return groups.map((group) => ValueItem(label: group.name, value: group.id)).toList();
   }
 
-  List<String> _valueItemsToStringList(List<ValueItem> selectedGroups) {
-    List<String> sg = [];
-    for (int i = 0; i < selectedGroups.length; i++) {
-      sg.add(selectedGroups.elementAt(i).label.toString());
+  List<Groups> _valueItemsToGroupList(List<ValueItem> selectedGroups) {
+    List<Groups> matchedGroups = [];
+    // Iteruj po wszystkich dostępnych grupach
+    for (var group in groups) {
+      // Sprawdź, czy id grupy pokrywa się z value w selectedGroups
+      for (var selectedGroup in selectedGroups) {
+        if (group.id == selectedGroup.value) {
+          matchedGroups.add(group); // Dodaj grupę do listy, jeśli jest zgodność
+          break; // Przestań iterować po selectedGroups, jeśli dopasowanie zostało znalezione
+        }
+      }
     }
-    return sg;
+    return matchedGroups;
   }
 
   void onChanged(bool? value) {
@@ -109,22 +134,40 @@ class _AddExerciseState extends State<AddExercise> {
         type: selectedCategory,
         application: check_applic ? 1 : 0,
         iconPath: images[selectedImageIndex],
-        groupName: _valueItemsToStringList(msc.selectedOptions),
+        groups: _valueItemsToGroupList(msc.selectedOptions), // Przechowujemy teraz obiekty Groups
         description: desc_tec.text,
       );
+
+      // Zaktualizuj ćwiczenie
       await DatabaseHelper().updateExercise(exercise);
+
+      // Pobierz ID grup, które zostały wybrane
+      List<int> remainingGroupIds = _valueItemsToGroupList(msc.selectedOptions).map((group) => group.id!).toList();
+
+      // aktualizuj ćwiczenia z grup
+      await GroupsManager.gManager.updateExerciseGroups(remainingGroupIds, exercise);
     } else {
+      // Logika dla nowego ćwiczenia
       Exercise exercise = Exercise(
         name: name_tec.text,
         type: selectedCategory,
         application: check_applic ? 1 : 0,
         iconPath: images[selectedImageIndex],
-        groupName: _valueItemsToStringList(msc.selectedOptions),
+        groups: _valueItemsToGroupList(msc.selectedOptions), // Przechowujemy teraz obiekty Groups
         description: desc_tec.text,
       );
       await DatabaseHelper().insertExercise(exercise);
+      Exercise? exerciseWithId = await DatabaseHelper().getLastExercise();
+      // Pobierz ID grup, które zostały wybrane
+      if(exerciseWithId != null && msc.selectedOptions.isNotEmpty){
+        print("Nie null, id: " + exerciseWithId.id.toString());
+        List<int> remainingGroupIds = _valueItemsToGroupList(msc.selectedOptions).map((group) => group.id!).toList();
+        // aktualizuj ćwiczenia z grup
+        await GroupsManager.gManager.updateExerciseGroups(remainingGroupIds, exerciseWithId);
+      }
     }
   }
+
 
   int getImageIndex(String path) {
     final regex = RegExp(r'\d+');
@@ -162,11 +205,9 @@ class _AddExerciseState extends State<AddExercise> {
                       width: double.infinity,
                       height: 200,
                       color: Colors.grey[100],
-                      // Tło kontenera, możesz zmienić kolor
                       child: Center(
                         child: Image.asset(
                           selectedImage,
-                          // Zmień na rzeczywistą ścieżkę do obrazka
                           width: 128,
                           height: 128,
                           fit: BoxFit.cover,
@@ -197,10 +238,7 @@ class _AddExerciseState extends State<AddExercise> {
                           return GestureDetector(
                             onTap: () {
                               setState(() {
-                                String path = images[index];
-                                path = path.replaceAll('L', '');
-                                print("sciezka: " + path);
-                                selectedImage = path;
+                                selectedImage = images[index].replaceAll('L', '');
                                 selectedImageIndex = index;
                               });
                             },
@@ -340,10 +378,15 @@ class _AddExerciseState extends State<AddExercise> {
                         options: _mapGroupsToValueItems(groups),
                         maxItems: 2,
                         selectionType: SelectionType.multi,
-                        chipConfig: const ChipConfig(wrapType: WrapType.wrap,backgroundColor: Color(0xFF2A8CBB)),
+                        chipConfig: const ChipConfig(
+                            wrapType: WrapType.wrap,
+                            backgroundColor: Color(0xFF2A8CBB)),
                         dropdownHeight: 300,
                         optionTextStyle: const TextStyle(fontSize: 16),
-                        selectedOptionIcon: const Icon(Icons.check_circle,color: Color(0xFF2A8CBB),),
+                        selectedOptionIcon: const Icon(
+                          Icons.check_circle,
+                          color: Color(0xFF2A8CBB),
+                        ),
                       ),
                     ),
                     Padding(
@@ -357,7 +400,7 @@ class _AddExerciseState extends State<AddExercise> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 15),
                       child: Container(
-                        height: 100, // Wysokość kontenera dla 4 linii tekstu
+                        height: 100,
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
                           borderRadius: BorderRadius.circular(10),
@@ -365,7 +408,7 @@ class _AddExerciseState extends State<AddExercise> {
                         padding: EdgeInsets.all(10),
                         child: TextFormField(
                           controller: desc_tec,
-                          maxLines: 4, // Ustawienie maksymalnej liczby linii
+                          maxLines: 4,
                           maxLength: 150,
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -388,7 +431,7 @@ class _AddExerciseState extends State<AddExercise> {
                   ),
                 ),
                 onPressed: () async {
-                  if (name_tec.text.isNotEmpty && msc.selectedOptions.isNotEmpty) {
+                  if (name_tec.text.isNotEmpty) {
                     await addExercise();
                     if (context.mounted) {
                       Navigator.pop(context, true);
@@ -396,7 +439,7 @@ class _AddExerciseState extends State<AddExercise> {
                   } else {
                     const snackBar = SnackBar(
                       content: Text(
-                        'Do not forget about name and groups!',
+                        'Do not forget about name!',
                         style: TextStyle(color: Colors.black),
                       ),
                       duration: Duration(seconds: 2),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../database_classes/DatabaseHelper.dart';
+import '../database_classes/Exercise.dart';
 import '../database_classes/Group.dart';
 
 class GroupsManager extends ChangeNotifier {
@@ -12,6 +13,45 @@ class GroupsManager extends ChangeNotifier {
   Future<List<Groups>> get groups {
     return _groups;
   }
+
+  // Aktualizowanie grup po edycji ćwiczenia
+  Future<void> updateExerciseGroups(List<int> remainingGroupIds, Exercise exerciseX) async {
+    List<Groups> groups = await DatabaseHelper().getGroups();
+    print("W funkcji id exercise: "+ exerciseX.id.toString());
+    for (var group in groups) {
+      // Sprawdź, czy grupa jest na liście grup do pozostawienia
+      //print("id w rem: " + remainingGroupIds.toString());
+      //print("id w petli: " + group.id.toString());
+
+      // Gdy chcemy usunąć ćwiczenie z grupy (czyli nie ma go w remainingGroupIds)
+      if (!remainingGroupIds.contains(group.id)) {
+        print("id w petli w ifie: " + group.id.toString());
+        print("id exercise w ifie: " + exerciseX.id.toString());
+
+        // Usuwanie ćwiczenia z listy ćwiczeń grupy
+        group.exercises.removeWhere((exercise) => exercise.id == exerciseX.id);
+        await DatabaseHelper().updateGroup(group);
+
+      }
+      // Gdy chcemy dodać ćwiczenie do grupy (czyli jest w remainingGroupIds, ale go nie było)
+      else {
+        // Sprawdź, czy ćwiczenie już istnieje w grupie
+        bool exerciseExists = group.exercises.any((exercise) => exercise.id == exerciseX.id);
+
+        if (!exerciseExists) {
+          // Jeśli ćwiczenie nie istnieje, dodaj je do grupy
+          group.exercises.add(exerciseX);  // Dodajemy cały obiekt Exercise
+          print("Dodano cwiczenie do grupy, id cwiczenia: " + exerciseX.id.toString());
+
+          // Zaktualizuj grupę w bazie danych
+          await DatabaseHelper().updateGroup(group);
+        }
+      }
+    }
+    // Odśwież dane grup
+    await refresh();
+  }
+
 
   // Funkcja odświeżająca dane z bazy
   Future<void> refresh() async {

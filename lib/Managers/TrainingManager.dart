@@ -19,7 +19,7 @@ class TrainingManager{
   late WorkoutController workoutController;
   late int exerciseNumber;
   late int series;
-  late List<int> weights;
+  late List<double> weights;
   late List<int> repeats;
   int _elapsedTime = 0;
   // sprawdza czy cwiczenie aktualne jest typu z ciezarkami czy bez
@@ -69,7 +69,7 @@ class TrainingManager{
     workoutController = WorkoutController(initiateWorkout());
   }
 
-  void addSetData(int weight, int repeat){
+  void addSetData(double weight, int repeat){
     weights.add(weight);
     repeats.add(repeat);
   }
