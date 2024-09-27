@@ -6,12 +6,14 @@ import '../WorkoutWidgets.dart';
 
 class DuringExerciseScreen extends StatefulWidget {
   final Groups group;
+  final int exerciseIndex;
   final int exerciseNumber;
   final int series;
 
   const DuringExerciseScreen({
     Key? key,
     required this.group,
+    required this.exerciseIndex,
     required this.exerciseNumber,
     required this.series,
   }) : super(key: key);

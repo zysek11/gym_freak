@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_freak/Pages/MenuPages/Workout/Begin/AcceptGroup.dart';
 import '../../../Controllers/GroupsController.dart';
 import '../../../database_classes/DatabaseHelper.dart';
 import '../../../database_classes/Exercise.dart';
@@ -50,11 +51,15 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
     await GroupsManager.gManager.initiateOrClearGroups(null, "A-Z");
     List<Groups> loadedGroups = await GroupsManager.gManager.groups;
 
+    // Usuń grupy, których pole 'exercises' jest puste
+    List<Groups> filteredGroups = loadedGroups.where((group) => group.exercises.isNotEmpty).toList();
+
     setState(() {
-      groups = loadedGroups; // Przypisz załadowane grupy
+      groups = filteredGroups; // Przypisz przefiltrowane grupy
       isLoading = false; // Wyłącz flagę ładowania
     });
   }
+
 
   void _onExerciseChecked(int exerciseId, bool isSelected) {
     setState(() {
@@ -244,10 +249,30 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                   ),
                 ),
                 onPressed: () async {
-                  List<Exercise> exercises = await DatabaseHelper().getExercisesByIds(selectedExercises);
-                  Groups ot_group = Groups(name: "Temporary group",
-                      iconPath: 'assets/group_icons/typeL0.png', exercises: exercises);
-                  Navigator.pop(context, ot_group);
+                  if(selectedExercises.isNotEmpty){
+                    List<Exercise> exercises = await DatabaseHelper().getExercisesByIds(selectedExercises);
+                    Groups ot_group = Groups(name: "Temporary group",
+                        iconPath: 'assets/group_icons/typeL0.png', exercises: exercises);
+                    if(context.mounted){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AcceptGroup(
+                              selectedGroup: ot_group,)), // Trzecia klasa przekierowująca
+                      );
+                    }
+                  }
+                  else{
+                    const snackBar = SnackBar(
+                      content: Text(
+                        'You need to pick at least 1 exercise!!',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      duration: Duration(seconds: 2),
+                      backgroundColor: Color(0xFFFFFFFF),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),

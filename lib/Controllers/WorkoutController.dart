@@ -31,6 +31,10 @@ class WorkoutController{
       widgetController.setActualWindow(widgetController.getCleanExercisesScreen());
       return widgetController.getActualWindow();
     }
+    else if(type == TrainingState.e_pick){
+      widgetController.setActualWindow(widgetController.getPickExerciseScreen());
+      return widgetController.getActualWindow();
+    }
     else if(type == TrainingState.e_before){
       widgetController.setActualWindow(widgetController.getBeforeExerciseScreen());
       return widgetController.getActualWindow();

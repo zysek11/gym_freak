@@ -3,6 +3,7 @@ import 'package:gym_freak/database_classes/Exercise.dart';
 import 'package:gym_freak/database_classes/Group.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import '../../../database_classes/DatabaseHelper.dart';
+import '../Workout/Begin/AcceptGroup.dart';
 
 class PickGroupExercises extends StatefulWidget {
   final Iterable<int>? editables;
@@ -283,17 +284,35 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
                   ),
                 ),
                 onPressed: () async {
-                  List<Exercise> allExercises = await exercisesFuture;
-                  List<Exercise> selectedExercisesList = allExercises
-                      .where((exercise) => selectedExercises.values.contains(exercise.id))
-                      .toList();
-                  if(widget.oneTimeW == false){
-                    Navigator.pop(context, selectedExercisesList);
+                  if(selectedExercises.isNotEmpty) {
+                    List<Exercise> allExercises = await exercisesFuture;
+                    List<Exercise> selectedExercisesList = allExercises
+                        .where((exercise) => selectedExercises.values.contains(exercise.id))
+                        .toList();
+                    if(widget.oneTimeW == false){
+                      Navigator.pop(context, selectedExercisesList);
+                    }
+                    else{
+                      Groups ot_group = Groups(name: "Temporary group",
+                          iconPath: 'assets/group_icons/typeL0.png', exercises: selectedExercisesList);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AcceptGroup(
+                              selectedGroup: ot_group,)), // Trzecia klasa przekierowująca
+                      );
+                    }
                   }
                   else{
-                    Groups ot_group = Groups(name: "Temporary group",
-                        iconPath: 'assets/group_icons/typeL0.png', exercises: selectedExercisesList);
-                    Navigator.pop(context, ot_group);
+                    const snackBar = SnackBar(
+                      content: Text(
+                        'You need to pick at least 1 exercise!',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      duration: Duration(seconds: 2),
+                      backgroundColor: Color(0xFFFFFFFF),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   }
                 },
                 child: Padding(

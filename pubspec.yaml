@@ -90,6 +90,7 @@ flutter:
     - assets/icons/exit.png
     - assets/workout_icons/
     - assets/group_icons/
+    - assets/screens/
     - assets/animations/no_group_anim.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

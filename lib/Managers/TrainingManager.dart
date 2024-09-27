@@ -7,7 +7,7 @@ import '../database_classes/Exercise.dart';
 import '../database_classes/Group.dart';
 import '../database_classes/Workout.dart';
 
-enum TrainingState {clean, e_before, e_during, e_after, e_summary, rating}
+enum TrainingState {clean, e_pick, e_before, e_during, e_after, e_summary, rating}
 
 
 class TrainingManager{
@@ -18,6 +18,8 @@ class TrainingManager{
   late Groups selectedGroup;
   late WorkoutController workoutController;
   late int exerciseNumber;
+  late int exerciseIdSelect;
+  List<int> alreadySelected = [];
   late int series;
   late List<double> weights;
   late List<int> repeats;
@@ -62,11 +64,18 @@ class TrainingManager{
 
   void setOrResetData(Groups group){
     exerciseNumber = 0;
+    alreadySelected.clear();
     series = 1;
     weights = [];
     repeats = [];
     selectedGroup = group;
     workoutController = WorkoutController(initiateWorkout());
+  }
+
+  void setExercise(int id){
+    exerciseIdSelect = id;
+    alreadySelected.add(id);
+    nextExercise();
   }
 
   void addSetData(double weight, int repeat){

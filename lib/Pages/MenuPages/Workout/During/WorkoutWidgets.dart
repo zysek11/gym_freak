@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
+import 'package:gym_freak/Pages/MenuPages/Workout/During/Screens/PickExerciseScreen.dart';
 import '../../../../database_classes/Group.dart';
 import 'Screens/AfterScreen.dart';
 import 'Screens/BeforeScreen.dart';
@@ -25,7 +26,7 @@ class _WorkoutWidgetsState extends State<WorkoutWidgets> {
   void initState() {
     super.initState();
     // Ustawienie aktualnego stanu treningu
-    TrainingManager.tManager.actualState = widget.type ? TrainingState.e_before : TrainingState.clean;
+    TrainingManager.tManager.actualState = widget.type ? TrainingState.e_pick : TrainingState.clean;
     TrainingManager.tManager.setOrResetData(widget.pg);
     previousState = null; // Brak poprzedniego stanu na początku
   }
@@ -74,9 +75,19 @@ class WidgetController {
     return actualWindow;
   }
 
+  Widget getPickExerciseScreen(){
+    return PickExerciseScreen(
+      group: TrainingManager.tManager.selectedGroup,
+      exerciseNumber: TrainingManager.tManager.exerciseNumber,
+      asList: TrainingManager.tManager.alreadySelected,
+      series: TrainingManager.tManager.series,
+    );
+  }
+
   Widget getBeforeExerciseScreen() {
     return BeforeExerciseScreen(
       group: TrainingManager.tManager.selectedGroup,
+      exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
       exerciseNumber: TrainingManager.tManager.exerciseNumber,
       series: TrainingManager.tManager.series,
     );
@@ -85,6 +96,7 @@ class WidgetController {
   Widget getDuringExerciseScreen() {
     return DuringExerciseScreen(
       group: TrainingManager.tManager.selectedGroup,
+      exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
       exerciseNumber: TrainingManager.tManager.exerciseNumber,
       series: TrainingManager.tManager.series,
     );
@@ -93,6 +105,7 @@ class WidgetController {
   Widget getAfterExerciseScreen() {
     return AfterExerciseScreen(
       group: TrainingManager.tManager.selectedGroup,
+      exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
       exerciseNumber: TrainingManager.tManager.exerciseNumber,
       series: TrainingManager.tManager.series,
     );

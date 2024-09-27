@@ -5,12 +5,14 @@ import '../../../../../database_classes/Group.dart';
 import '../WorkoutWidgets.dart';
 class BeforeExerciseScreen extends StatefulWidget {
   final Groups group;
+  final int exerciseIndex;
   final int exerciseNumber;
   final int series;
 
   const BeforeExerciseScreen({
     Key? key,
     required this.group,
+    required this.exerciseIndex,
     required this.exerciseNumber,
     required this.series,
   }) : super(key: key);
@@ -65,7 +67,7 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
               ),
               SizedBox(height: 30),
               Text(
-                widget.group.exercises[widget.exerciseNumber].name,
+                widget.group.exercises[widget.exerciseIndex].name,
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 style: TextStyle(
@@ -96,11 +98,10 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
                 text: widget.series == 1 ? 'SKIP EXERCISE': "EXERCISE DONE",
                 onPressed: () {
                   if(widget.series != 1){
-                    TrainingManager.tManager.sendWorkoutData(widget.group.exercises[widget.exerciseNumber]);
+                    TrainingManager.tManager.sendWorkoutData(widget.group.exercises[widget.exerciseIndex]);
                   }
                   if (widget.group.exercises.length > widget.exerciseNumber + 1) {
-                    TrainingManager.tManager.nextExercise();
-                    TrainingManager.tManager.actualState = TrainingState.e_before;
+                    TrainingManager.tManager.actualState = TrainingState.e_pick;
                   } else {
                     TrainingManager.tManager.actualState = TrainingState.e_summary;
                   }
