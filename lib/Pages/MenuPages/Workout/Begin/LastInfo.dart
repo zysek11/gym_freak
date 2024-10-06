@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gym_freak/Pages/MenuPages/Workout/During/Screens/PickExerciseScreen.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/During/WorkoutWidgets.dart';
 
+import '../../../../Managers/TrainingManager.dart';
 import '../../../../database_classes/Group.dart';
 
 class LastInfo extends StatefulWidget {
@@ -19,7 +21,7 @@ class _LastInfoState extends State<LastInfo> {
       backgroundColor: Color(0xFF2A8CBB),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40, horizontal: 25),
+          padding: EdgeInsets.only(top: 30, bottom: 10,left: 25, right: 25),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -55,10 +57,18 @@ class _LastInfoState extends State<LastInfo> {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(
+                    TrainingManager.tManager.setOrResetData(widget.pg);
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>  WorkoutWidgets(pg: widget.pg,type: widget.type)),
+                          builder: (context) =>
+                              PickExerciseScreen(
+                                group: TrainingManager.tManager.selectedGroup,
+                                exerciseNumber: TrainingManager.tManager.exerciseNumber,
+                                asList: TrainingManager.tManager.alreadySelected,
+                                series: TrainingManager.tManager.series,
+                              ),),
+                          (Route<dynamic> route) => route.isFirst,
                     );
                   },
                   child: Padding(

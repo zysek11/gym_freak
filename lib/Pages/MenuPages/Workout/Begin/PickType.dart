@@ -27,7 +27,7 @@ class _PickTypeState extends State<PickType> {
       backgroundColor: Color(0xFF2A8CBB),
       body: SafeArea(
           child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 40, horizontal: 25),
+        padding: EdgeInsets.only(top: 30, bottom: 10,left: 25, right: 25),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [

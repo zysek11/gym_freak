@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
 import '../../../../../database_classes/Group.dart';
 import '../WorkoutWidgets.dart';
+import 'AfterScreen.dart';
+import 'BeforeScreen.dart';
 
 class DuringExerciseScreen extends StatefulWidget {
   final Groups group;
@@ -23,6 +25,13 @@ class DuringExerciseScreen extends StatefulWidget {
 }
 
 class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
+
+  @override
+  void initState() {
+    TrainingManager.tManager.startTimer();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,24 +42,7 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Container(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  widget.group.name,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontFamily: 'Jaapokki',
-                  ),
-                ),
-              ),
-              Container(
-                alignment: Alignment.topLeft,
-                child: Image.asset(
-                  widget.group.iconPath,
-                ),
-              ),
-              SizedBox(height: 75,),
+              Spacer(),
               Text(
                 "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
                 style: TextStyle(
@@ -102,13 +94,34 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
               TrainingButton(
                 text: 'FINISHED!',
                 onPressed: () {
+                  TrainingManager.tManager.stopTimer();
                   if(widget.group.exercises[widget.exerciseNumber].application == 1)
                     {
-                      TrainingManager.tManager.actualState = TrainingState.e_after;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AfterExerciseScreen(
+                            group: TrainingManager.tManager.selectedGroup,
+                            exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
+                            exerciseNumber: TrainingManager.tManager.exerciseNumber,
+                            series: TrainingManager.tManager.series,
+                          ),
+                        ),
+                      );
                     }
                   else{
                     TrainingManager.tManager.nextSeries();
-                    TrainingManager.tManager.actualState = TrainingState.e_before;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BeforeExerciseScreen(
+                          group: TrainingManager.tManager.selectedGroup,
+                          exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
+                          exerciseNumber: TrainingManager.tManager.exerciseNumber,
+                          series: TrainingManager.tManager.series,
+                        ),
+                      ),
+                    );
                   }
                 },
               ),

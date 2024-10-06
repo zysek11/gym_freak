@@ -7,10 +7,9 @@ import '../database_classes/Exercise.dart';
 import '../database_classes/Group.dart';
 import '../database_classes/Workout.dart';
 
-enum TrainingState {clean, e_pick, e_before, e_during, e_after, e_summary, rating}
 
 
-class TrainingManager{
+class TrainingManager {
   TrainingManager._privateConstructor();
   static final TrainingManager _tManager = TrainingManager._privateConstructor();
   static TrainingManager get tManager => _tManager;
@@ -23,46 +22,35 @@ class TrainingManager{
   late int series;
   late List<double> weights;
   late List<int> repeats;
+
+  // Timer dla poszczególnych ćwiczeń
   int _elapsedTime = 0;
-  // sprawdza czy cwiczenie aktualne jest typu z ciezarkami czy bez
-  bool exerciseClassicType = true;
   Timer? _timer;
 
-  final StreamController<TrainingState> _stateController = StreamController<TrainingState>.broadcast();
+  // Globalny timer dla całego treningu
+  int _elapsedGlobalTime = 0;
+  Timer? _globalTimer;
+
   final StreamController<int> _timeController = StreamController<int>.broadcast();
+  final StreamController<int> _globalTimeController = StreamController<int>.broadcast(); // Globalny stream
 
-  TrainingState _actualState = TrainingState.clean;
-
-  TrainingState get actualState => _actualState;
   Stream<int> get timeStream => _timeController.stream;
-
-  set actualState(TrainingState newState) {
-    _actualState = newState;
-    _stateController.add(newState); // Emituje nowy stan
-
-    if (newState == TrainingState.e_during) {
-      _startTimer();  // Uruchamia timer dla stanu e_during
-    } else {
-      _stopTimer();  // Zatrzymuje timer dla innych stanów
-    }
-
-  }
-
-  Stream<TrainingState> get stateStream => _stateController.stream;
+  Stream<int> get globalTimeStream => _globalTimeController.stream; // Globalny stream
 
   void dispose() {
-    _stateController.close(); // Zamyka kontroler strumienia, gdy nie jest już potrzebny
     _timeController.close();
-    _stopTimer();
+    _globalTimeController.close(); // Zamknięcie streamu globalnego
+    stopTimer();
+    stopGlobalTimer(); // Zatrzymanie globalnego timera
   }
 
-  Workout initiateWorkout(){
+  Workout initiateWorkout() {
     DateTime dateTime = DateTime.now();
     DateTime dateOnly = DateTime(dateTime.year, dateTime.month, dateTime.day);
     return Workout.temporary(exercises: [], date: dateOnly);
   }
 
-  void setOrResetData(Groups group){
+  void setOrResetData(Groups group) {
     exerciseNumber = 0;
     alreadySelected.clear();
     series = 1;
@@ -72,54 +60,82 @@ class TrainingManager{
     workoutController = WorkoutController(initiateWorkout());
   }
 
-  void setExercise(int id){
+  void setExercise(int id) {
     exerciseIdSelect = id;
-    alreadySelected.add(id);
-    nextExercise();
   }
 
-  void addSetData(double weight, int repeat){
+  void addSetData(double weight, int repeat) {
     weights.add(weight);
     repeats.add(repeat);
   }
-  void sendWorkoutData(Exercise exercise){
-    exercise.application == 1 ? workoutController.addExerciseToWorkout(exercise, series, weights, repeats)
-    : workoutController.addExerciseToWorkoutBasic(exercise, series);
+
+  void sendWorkoutData(Exercise exercise) {
+    exercise.application == 1
+        ? workoutController.addExerciseToWorkout(exercise, series, weights, repeats)
+        : workoutController.addExerciseToWorkoutBasic(exercise, series);
+    alreadySelected.add(exerciseIdSelect);
+    nextExercise();
   }
 
-  void nextSeries(){
+  void sendSkipData(){
+    alreadySelected.add(exerciseIdSelect);
+    nextExercise();
+  }
+
+  void nextSeries() {
     series += 1;
   }
-  void nextExercise(){
-      exerciseNumber += 1;
-      series = 1;
-      weights = [];
-      repeats = [];
+
+  void nextExercise() {
+    exerciseNumber += 1;
+    series = 1;
+    weights = [];
+    repeats = [];
   }
 
-  // kod dla notyfikacji
+  void checkUndoSeries() {
+    if (series > 1) {
+      series -= 1;
+      weights.removeLast();
+      repeats.removeLast();
+    }
+  }
 
-  //
-
-
-  // kod dla odliczania czasu
-  void _startTimer() {
-    _resetTimer();
+  // Kod dla odliczania czasu poszczególnych ćwiczeń
+  void startTimer() {
+    resetTimer();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       _elapsedTime++;  // Zwiększa czas o 1 sekundę
       _timeController.add(_elapsedTime);  // Emituje nowy czas przez strumień
     });
   }
 
-  void _stopTimer() {
+  void stopTimer() {
     _timer?.cancel();  // Anuluje istniejący timer
   }
 
-  void _resetTimer() {
-    _stopTimer();  // Najpierw zatrzymuje timer
+  void resetTimer() {
+    stopTimer();  // Najpierw zatrzymuje timer
     _elapsedTime = 0;  // Resetuje czas
     _timeController.add(_elapsedTime);  // Emituje nowy czas przez strumień
   }
 
-//
+  // Kod dla globalnego timera całego treningu
+  void startGlobalTimer() {
+    resetGlobalTimer();
+    _globalTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _elapsedGlobalTime++;  // Zwiększa globalny czas o 1 sekundę
+      _globalTimeController.add(_elapsedGlobalTime);  // Emituje nowy globalny czas przez strumień
+    });
+  }
+
+  void stopGlobalTimer() {
+    _globalTimer?.cancel();  // Anuluje istniejący globalny timer
+  }
+
+  void resetGlobalTimer() {
+    stopGlobalTimer();  // Najpierw zatrzymuje globalny timer
+    _elapsedGlobalTime = 0;  // Resetuje globalny czas
+    _globalTimeController.add(_elapsedGlobalTime);  // Emituje nowy globalny czas przez strumień
+  }
 }

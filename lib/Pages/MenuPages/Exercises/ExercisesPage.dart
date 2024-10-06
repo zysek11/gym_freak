@@ -73,39 +73,41 @@ class _ExercisesPageState extends State<ExercisesPage> {
           backgroundColor: Colors.white,
           title: Center(
             child: Text(
-              "Confirm Deletion",
+              "Deletion",
               style: TextStyle(
-                color: Colors.blue,
-                fontSize: 30, // Ustawienie koloru na niebieski
+                color: Color(0xFF2A8CBB),
+                fontSize: 27, // Ustawienie koloru na niebieski
               ),
             ),
           ),
           content: exercise != null
-              ? Text("Are you sure you want to delete this exercise?")
-              : Text("Are you sure you want to delete this group?"),
+              ? Text("Are you sure you want to delete this exercise?",
+                style: TextStyle(
+                  fontSize: 20, // Ustawienie koloru na niebieski
+                ),)
+              : Text("Are you sure you want to delete this group?",
+                style: TextStyle(
+                  fontSize: 20, // Ustawienie koloru na niebieski
+                ),),
           actions: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               // Równomierne ułożenie przycisków w poziomie
               children: [
                 TextButton(
-                  child: Text(
-                    "Cancel",
-                    style: TextStyle(
-                      color: Color(0xFF2A8CBB),
-                      fontWeight: FontWeight.bold,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color(0xFF2A8CBB), // Kolor tła przycisku
+                    padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), // Padding wewnątrz przycisku
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12), // Zaokrąglone rogi
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Zamknięcie dialogu
-                  },
-                ),
-                TextButton(
                   child: Text(
                     "Delete",
                     style: TextStyle(
-                      color: Color(0xFF2A8CBB),
+                      color: Color(0xFFFFFFFF), // Kolor tekstu
                       fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
                   onPressed: () {
@@ -122,6 +124,20 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       GroupsManager.gManager.sortGroups(selected_optionB);
                     }
                     showMore = -1;
+                  },
+                ),
+
+                TextButton(
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                        color: Color(0xFF2A8CBB),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Zamknięcie dialogu
                   },
                 ),
               ],
