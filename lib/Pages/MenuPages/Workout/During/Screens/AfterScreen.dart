@@ -38,6 +38,10 @@ class _AfterExerciseScreenState extends State<AfterExerciseScreen> {
 
   @override
   void initState() {
+    TrainingManager.tManager.stopTimer();
+    if(TrainingManager.tManager.breakTimerOn){
+      TrainingManager.tManager.startBreakTimer();
+    }
     writeDataToWeight();
     writeDataToRepeat();
     super.initState();

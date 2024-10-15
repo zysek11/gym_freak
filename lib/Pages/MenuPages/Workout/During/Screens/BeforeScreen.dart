@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
 import '../../../../../database_classes/Group.dart';
 import '../WorkoutWidgets.dart';
+import 'CardComponent.dart';
 import 'DuringScreen.dart';
 import 'PickExerciseScreen.dart';
 import 'SummaryScreen.dart';
@@ -43,6 +44,7 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: true, duringActive: false,),
                 Spacer(),
                 Text(
                   "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
@@ -109,12 +111,12 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
                                 group: TrainingManager.tManager.selectedGroup,
                                 exerciseNumber: TrainingManager.tManager.exerciseNumber,
                                 asList: TrainingManager.tManager.alreadySelected,
-                                series: TrainingManager.tManager.series,
+                                series: TrainingManager.tManager.series, full: true,
                               ),),
                             (Route<dynamic> route) => route.isFirst,
                       );
                     } else {
-                      if(TrainingManager.tManager.workoutController.selectedWorkout.exercises.isNotEmpty){
+                      if(TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty){
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(

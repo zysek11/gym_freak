@@ -15,7 +15,7 @@ class TrainingManager {
   static TrainingManager get tManager => _tManager;
 
   late Groups selectedGroup;
-  late WorkoutController workoutController;
+  WorkoutController? workoutController;
   late int exerciseNumber;
   late int exerciseIdSelect;
   List<int> alreadySelected = [];
@@ -27,21 +27,46 @@ class TrainingManager {
   int _elapsedTime = 0;
   Timer? _timer;
 
+  bool breakTimerOn = false;
+  int _breakElapsedTime = 0;
+  Timer? _breakTimer;
+
   // Globalny timer dla całego treningu
   int _elapsedGlobalTime = 0;
   Timer? _globalTimer;
 
-  final StreamController<int> _timeController = StreamController<int>.broadcast();
-  final StreamController<int> _globalTimeController = StreamController<int>.broadcast(); // Globalny stream
+  StreamController<int> _timeController = StreamController<int>.broadcast();
+  StreamController<int> _breakTimeController = StreamController<int>.broadcast();
+  StreamController<int> _globalTimeController = StreamController<int>.broadcast(); // Globalny stream
 
   Stream<int> get timeStream => _timeController.stream;
+  Stream<int> get breakTimeStream => _breakTimeController.stream;
   Stream<int> get globalTimeStream => _globalTimeController.stream; // Globalny stream
+
+  Duration returnFullTime(){
+    return Duration(seconds: _elapsedGlobalTime);
+  }
+
+  Duration returnBreakTime(){
+    return Duration(seconds: _breakElapsedTime);
+  }
 
   void dispose() {
     _timeController.close();
+    _breakTimeController.close();
     _globalTimeController.close(); // Zamknięcie streamu globalnego
     stopTimer();
+    stopBreakTimer();
     stopGlobalTimer(); // Zatrzymanie globalnego timera
+  }
+
+  void cleanData(){
+    exerciseNumber = 0;
+    alreadySelected.clear();
+    series = 1;
+    weights = [];
+    repeats = [];
+    workoutController = null;
   }
 
   Workout initiateWorkout() {
@@ -58,10 +83,17 @@ class TrainingManager {
     repeats = [];
     selectedGroup = group;
     workoutController = WorkoutController(initiateWorkout());
+    _timeController = StreamController<int>.broadcast();
+    _breakTimeController = StreamController<int>.broadcast();
+    _globalTimeController = StreamController<int>.broadcast();
   }
 
   void setExercise(int id) {
     exerciseIdSelect = id;
+  }
+
+  void short_assignForSummary(){
+    workoutController?.assignExercisesForSummary(selectedGroup.exercises);
   }
 
   void addSetData(double weight, int repeat) {
@@ -71,8 +103,8 @@ class TrainingManager {
 
   void sendWorkoutData(Exercise exercise) {
     exercise.application == 1
-        ? workoutController.addExerciseToWorkout(exercise, series, weights, repeats)
-        : workoutController.addExerciseToWorkoutBasic(exercise, series);
+        ? workoutController!.addExerciseToWorkout(exercise, series, weights, repeats)
+        : workoutController!.addExerciseToWorkoutBasic(exercise, series);
     alreadySelected.add(exerciseIdSelect);
     nextExercise();
   }
@@ -118,6 +150,27 @@ class TrainingManager {
     stopTimer();  // Najpierw zatrzymuje timer
     _elapsedTime = 0;  // Resetuje czas
     _timeController.add(_elapsedTime);  // Emituje nowy czas przez strumień
+  }
+
+  // Kod dla odliczania czasu poszczególnych ćwiczeń
+  void startBreakTimer() {
+    if(breakTimerOn){
+      resetBreakTimer();
+      _breakTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+        _breakElapsedTime++;  // Zwiększa czas o 1 sekundę
+        _breakTimeController.add(_breakElapsedTime);  // Emituje nowy czas przez strumień
+      });
+    }
+  }
+
+  void stopBreakTimer() {
+    _breakTimer?.cancel();  // Anuluje istniejący timer
+  }
+
+  void resetBreakTimer() {
+    stopBreakTimer();  // Najpierw zatrzymuje timer
+    _breakElapsedTime = 0;  // Resetuje czas
+    _breakTimeController.add(_breakElapsedTime);  // Emituje nowy czas przez strumień
   }
 
   // Kod dla globalnego timera całego treningu

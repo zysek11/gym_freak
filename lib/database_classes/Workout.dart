@@ -9,8 +9,8 @@ class Workout {
   final int? id;
   late List<ExerciseWrapper> exercises;
   DateTime date;
-  late int intensity;
-  late int satisfaction;
+  late double intensity;
+  late double satisfaction;
   late String comment;
   late Duration time;
 

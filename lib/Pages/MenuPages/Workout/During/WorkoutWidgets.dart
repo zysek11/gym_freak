@@ -40,7 +40,7 @@ class TrainingButton extends StatelessWidget {
                 text,
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 25,
+                  fontSize: 22,
                   fontFamily: 'Jaapokki',
                 ),
               ),

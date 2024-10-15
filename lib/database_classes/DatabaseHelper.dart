@@ -48,8 +48,8 @@ class DatabaseHelper {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           exercises TEXT,
           date TEXT,
-          intensity INTEGER,
-          satisfaction INTEGER,
+          intensity REAL,
+          satisfaction REAL,
           comment TEXT,
           time INTEGER
         )

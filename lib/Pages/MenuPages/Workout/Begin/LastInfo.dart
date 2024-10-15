@@ -58,6 +58,7 @@ class _LastInfoState extends State<LastInfo> {
                   ),
                   onPressed: () {
                     TrainingManager.tManager.setOrResetData(widget.pg);
+                    TrainingManager.tManager.startGlobalTimer();
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
@@ -66,7 +67,7 @@ class _LastInfoState extends State<LastInfo> {
                                 group: TrainingManager.tManager.selectedGroup,
                                 exerciseNumber: TrainingManager.tManager.exerciseNumber,
                                 asList: TrainingManager.tManager.alreadySelected,
-                                series: TrainingManager.tManager.series,
+                                series: TrainingManager.tManager.series, full: widget.type,
                               ),),
                           (Route<dynamic> route) => route.isFirst,
                     );

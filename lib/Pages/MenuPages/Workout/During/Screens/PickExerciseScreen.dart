@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../../database_classes/Group.dart';
 import '../../../../../database_classes/Exercise.dart';
 import '../WorkoutWidgets.dart';
 import 'BeforeScreen.dart';
+import 'CardComponent.dart';
 import 'SummaryScreen.dart';
 
 class PickExerciseScreen extends StatefulWidget {
@@ -11,6 +13,7 @@ class PickExerciseScreen extends StatefulWidget {
   final int exerciseNumber;
   final List<int> asList;
   final int series;
+  final bool full;
 
   const PickExerciseScreen({
     super.key,
@@ -18,6 +21,7 @@ class PickExerciseScreen extends StatefulWidget {
     required this.exerciseNumber,
     required this.asList,
     required this.series,
+    required this.full
   });
 
   @override
@@ -27,7 +31,6 @@ class PickExerciseScreen extends StatefulWidget {
 class _PickExerciseScreenState extends State<PickExerciseScreen> {
   @override
   void initState() {
-    TrainingManager.tManager.startGlobalTimer();
     super.initState();
   }
 
@@ -122,57 +125,21 @@ class _PickExerciseScreenState extends State<PickExerciseScreen> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text(
-                  widget.group.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontFamily: 'Jaapokki',
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        widget.group.iconPath,
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                      ),
-                      const SizedBox(width: 30),
-                      StreamBuilder<int>(
-                        stream: TrainingManager.tManager.globalTimeStream,
-                        initialData: 0,
-                        builder: (context, snapshot) {
-                          final elapsedTime = snapshot.data ?? 0;
-                          final minutes = (elapsedTime ~/ 60).toString().padLeft(2, '0');
-                          final seconds = (elapsedTime % 60).toString().padLeft(2, '0');
-                          return Text(
-                            "$minutes:$seconds",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontFamily: 'Jaapokki',
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 10),
                 const Text(
-                  "PICK EXERCISE",
+                  "WORKOUT MANAGER",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 30,
                     fontFamily: 'Jaapokki',
                   ),
                 ),
+                const SizedBox(height: 15),
+                widget.full ? const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: true, duringActive: false,)
+                  : const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: false, duringActive: false,),
                 const SizedBox(height: 20),
-                Expanded(
+                if(widget.full)
+                  Expanded(
                   child: Center(
                     child: GridView.builder(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -247,16 +214,38 @@ class _PickExerciseScreenState extends State<PickExerciseScreen> {
                       },
                     ),
                   ),
-                ),
+                )
+                else ...[
+                  Spacer(),
+                  Text(
+                    textAlign: TextAlign.center,
+                    "WORKOUT\nIN PROGRESS!\nSTAY STRONG!",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontFamily: 'Jaapokki',
+                        height: 2
+                    ),
+                  ),
+                  Spacer(),
+                  Lottie.asset(
+                    'assets/animations/workout_in_progress.json', // Ścieżka do lokalnego pliku JSON
+                    width: 250,
+                    height: 250,
+                    fit: BoxFit.fill,
+                  ),
+                  Spacer()
+                ],
                 const SizedBox(height: 20),
-                TrainingButton(
-                  text: TrainingManager.tManager.workoutController.selectedWorkout.exercises.isNotEmpty ? 'FINISH BEFORE': "CANCEL",
+                widget.full ? TrainingButton(
+                  text: TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty ? 'FINISH BEFORE': "CANCEL",
                   onPressed: () async {
-                    if(TrainingManager.tManager.workoutController.selectedWorkout.exercises.isNotEmpty){
+                    if(TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty){
                       final bool shouldpop = await showExitTrainingDialog(context,
                           'Leaving this screen will finish this training. '
                               'Are you sure you want to exit?') ?? false;
                       if(context.mounted && shouldpop){
+
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
@@ -274,6 +263,24 @@ class _PickExerciseScreenState extends State<PickExerciseScreen> {
                         Navigator.pop(context);
                       }
                     }
+                  },
+                ) :
+                TrainingButton(
+                  text: "WORKOUT DONE",
+                  onPressed: () async {
+                      final bool shouldpop = await showExitTrainingDialog(context,
+                          'Leaving this screen will finish this training. '
+                              'Are you sure you want to exit?') ?? false;
+                      if(context.mounted && shouldpop){
+                        TrainingManager.tManager.short_assignForSummary();
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                            const SummaryExerciseScreen(),),
+                              (Route<dynamic> route) => route.isFirst,
+                        );
+                      }
                   },
                 ),
               ],

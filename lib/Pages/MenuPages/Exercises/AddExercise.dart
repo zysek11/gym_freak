@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
+import '../../../Controllers/ExerciseTypesManager.dart';
 import '../../../Controllers/GroupsController.dart';
 import '../../../database_classes/DatabaseHelper.dart';
 import '../../../database_classes/Exercise.dart';
@@ -33,23 +34,13 @@ class _AddExerciseState extends State<AddExercise> {
         (index) => 'assets/workout_icons/typeL$index.png',
   );
 
-  final List<String> categories = [
-    "Back  ",
-    "Biceps  ",
-    "Chest  ",
-    'Triceps  ',
-    "ABS  ",
-    "Legs  ",
-    "Shoulders  ",
-    'Stretching  ',
-    'Other  '
-  ];
+  final ExerciseTypesManager _exerciseTypesManager = ExerciseTypesManager();
 
   void initializeData() {
     check_applic = true;
     selectedImage = 'assets/workout_icons/typeL0.png';
     selectedImageIndex = 0;
-    selectedCategory = "Back  ";
+    selectedCategory = _exerciseTypesManager.allExercises.first['name'];
   }
 
   void loadData() {
@@ -81,9 +72,42 @@ class _AddExerciseState extends State<AddExercise> {
     desc_tec.text = widget.exercise!.description;
   }
 
+  Future<void> _showAddExerciseTypeDialog() async {
+    TextEditingController customExerciseController = TextEditingController();
 
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Add Custom Exercise Type"),
+          content: TextField(
+            controller: customExerciseController,
+            decoration: InputDecoration(hintText: "Enter exercise type"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (customExerciseController.text.isNotEmpty) {
+                  await _exerciseTypesManager.addCustomExercise(customExerciseController.text);
+                  setState(() {
+                    selectedCategory = customExerciseController.text;
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  Future<void> _loadGroups() async {
+  Future<void> _loadGroupsAndTypes() async {
     List<Groups> groupList = await DatabaseHelper().getGroups();
     setState(() {
       groups = groupList; // Używamy teraz pełnych obiektów Groups
@@ -183,7 +207,7 @@ class _AddExerciseState extends State<AddExercise> {
   void initState() {
     super.initState();
     initializeData();
-    _loadGroups().then((value) {
+    _loadGroupsAndTypes().then((value) {
       if (widget.edit) {
         loadData();
       }
@@ -295,24 +319,59 @@ class _AddExerciseState extends State<AddExercise> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: selectedCategory,
-                            items: categories.map((String category) {
-                              return DropdownMenuItem<String>(
-                                value: category,
-                                child: Text(
-                                  category,
-                                  style: TextStyle(fontSize: 20),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _exerciseTypesManager.allExercises
+                                    .any((exercise) => exercise['name'] == selectedCategory)
+                                    ? selectedCategory
+                                    : null,  // Ensure the selected value exists in the dropdown
+                                items: _exerciseTypesManager.allExercises.map((exercise) {
+                                  return DropdownMenuItem<String>(
+                                    value: exercise['name'],  // Ensure the name is unique
+                                    child: Text(exercise['name'], style: TextStyle(fontSize: 20)),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedCategory = newValue!;
+                                  });
+                                },
+                              ),
+                            ),
+                            Spacer(),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: _showAddExerciseTypeDialog,
+                            ),
+                            Spacer(),
+                            if(_exerciseTypesManager.checkIfCustom(selectedCategory))
+                              ...[
+                                IconButton(
+                                  icon: Icon(Icons.remove),
+                                  onPressed: () async {
+                                      bool message = await ExerciseTypesManager().removeCustomExercise(selectedCategory);
+                                      if(!message){
+                                        const snackBar = SnackBar(
+                                          content: Text(
+                                            'There are exercises related to this type, change it first.',
+                                            style: TextStyle(color: Colors.black),
+                                          ),
+                                          duration: Duration(seconds: 2),
+                                          backgroundColor: Color(0xFFFFFFFF),
+                                        );
+                                        if(context.mounted){
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                        }
+                                      }
+                                      setState(() {});
+                                  },
                                 ),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedCategory = newValue!;
-                              });
-                            },
-                          ),
+                                const Spacer()
+                              ]
+                          ],
                         ),
                       ),
                     ),

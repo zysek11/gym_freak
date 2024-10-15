@@ -5,6 +5,7 @@ import '../../../../../database_classes/Group.dart';
 import '../WorkoutWidgets.dart';
 import 'AfterScreen.dart';
 import 'BeforeScreen.dart';
+import 'CardComponent.dart';
 
 class DuringExerciseScreen extends StatefulWidget {
   final Groups group;
@@ -28,6 +29,9 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
 
   @override
   void initState() {
+    if(TrainingManager.tManager.breakTimerOn){
+      TrainingManager.tManager.stopBreakTimer();
+    }
     TrainingManager.tManager.startTimer();
     super.initState();
   }
@@ -42,7 +46,8 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Spacer(),
+              const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: false, duringActive: true,),
+              SizedBox(height: 100,),
               Text(
                 "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
                 style: TextStyle(
@@ -51,7 +56,7 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
                   fontFamily: 'Jaapokki',
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 25),
               Text(
                 widget.group.exercises[widget.exerciseNumber].name,
                 maxLines: 3,
@@ -63,7 +68,7 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
                   fontFamily: 'Jaapokki',
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 25),
               Text(
                 "SET: ${widget.series}",
                 style: TextStyle(
@@ -71,24 +76,6 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
                   fontSize: 40,
                   fontFamily: 'Jaapokki',
                 ),
-              ),
-              SizedBox(height: 100),
-              StreamBuilder<int>(
-                stream: TrainingManager.tManager.timeStream,
-                initialData: 0,
-                builder: (context, snapshot) {
-                  final elapsedTime = snapshot.data ?? 0;
-                  final minutes = (elapsedTime ~/ 60).toString().padLeft(2, '0');
-                  final seconds = (elapsedTime % 60).toString().padLeft(2, '0');
-                  return Text(
-                    "$minutes:$seconds",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 70,
-                      fontFamily: 'Jaapokki',
-                    ),
-                  );
-                },
               ),
               Spacer(),
               TrainingButton(

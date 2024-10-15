@@ -42,6 +42,7 @@ dependencies:
   provider: ^6.1.2
   multi_dropdown: ^2.1.4
   lottie: ^3.1.2
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:
@@ -88,10 +89,15 @@ flutter:
     - assets/icons/right_arrow2.png
     - assets/icons/add_icon.png
     - assets/icons/exit.png
+    - assets/icons/kettlebell_full.png
+    - assets/icons/kettlebell_empty.png
+    - assets/icons/kettlebell_half.png
+    - assets/icons/procrastination.png
+    - assets/icons/jump_rope.png
     - assets/workout_icons/
     - assets/group_icons/
     - assets/screens/
-    - assets/animations/no_group_anim.json
+    - assets/animations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

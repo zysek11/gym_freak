@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gym_freak/Controllers/ExercisesController.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
+import 'package:gym_freak/Pages/MenuPages/Workout/During/Screens/RatingScreen.dart';
 import 'package:gym_freak/database_classes/Workout.dart';
 import 'package:gym_freak/database_classes/ExerciseWrapper.dart';
 
 import '../WorkoutWidgets.dart';
+import 'additional/ExerciseSelectionDialog.dart';
 
 class SummaryExerciseScreen extends StatefulWidget {
   const SummaryExerciseScreen({Key? key}) : super(key: key);
@@ -18,7 +21,8 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
   @override
   void initState() {
     super.initState();
-    workout = TrainingManager.tManager.workoutController.selectedWorkout;
+    TrainingManager.tManager.dispose();
+    workout = TrainingManager.tManager.workoutController!.selectedWorkout;
   }
 
   void removeSet(ExerciseWrapper exercise, int setIndex) {
@@ -45,6 +49,21 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
     _editSetDialog(exercise, exercise.weights!.length - 1);
   }
 
+  void removeExercise(int id){
+    workout.exercises.removeAt(id);
+  }
+
+  void _showAddExerciseDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ExerciseSelectionDialog(group: TrainingManager.tManager.selectedGroup);
+      },
+    ).then((_) {
+      setState(() {}); // Refresh the screen after adding an exercise
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,9 +76,9 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
             children: [
               const Center(
                 child: Text(
-                  'WORKOUT SUMMARY',
+                  'SUMMARY',
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: Colors.white, // Biały tekst
                   ),
@@ -72,6 +91,7 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
                   itemBuilder: (context, index) {
                     final exercise = workout.exercises[index];
                     return Card(
+                      color: Colors.white,
                       margin: const EdgeInsets.symmetric(vertical: 10),
                       elevation: 3,
                       shape: RoundedRectangleBorder(
@@ -82,15 +102,33 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Center(
-                              child: Text(
-                                exercise.exercise.name,
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset(exercise.exercise.iconPath, width: 50, height: 50),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: Text(
+                                    exercise.exercise.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      color: Colors.black,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 15),
+                                IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () {
+                                    setState(() {
+                                      removeExercise(index);
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 15),
                             ListView.separated(
@@ -150,7 +188,7 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
                                   addSet(exercise); // Natychmiast po dodaniu otwieramy dialog
                                 },
                                 icon: const Icon(Icons.add),
-                                label: const Text('Add Set'),
+                                label: const Text('Add Set',style: TextStyle(fontSize: 19),),
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   backgroundColor: const Color(0xFF2A8CBB),
@@ -169,8 +207,33 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
               ),
               SizedBox(height: 10,),
               TrainingButton(
+                  text: 'Add missing exercises',
+                  onPressed: _showAddExerciseDialog
+              ),
+              SizedBox(height: 10,),
+              TrainingButton(
                 text: 'NEXT',
                 onPressed: () {
+                  if(workout.exercises.any((exercise) => exercise.series == 0)){
+                    const snackBar = SnackBar(
+                      content: Text(
+                        'Do not leave empty exercises ;)',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      duration: Duration(seconds: 2),
+                      backgroundColor: Color(0xFFFFFFFF),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
+                  else{
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RatingExercisesScreen(
+                        ),
+                      ),
+                    );
+                  }
                 },
               ),
             ],
