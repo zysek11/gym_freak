@@ -28,9 +28,7 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
 
   void _initiateSelectedExercises() {
     if (widget.editables != null) {
-      for (int i in widget.editables!) {
-        selectedExercises.add(i);
-      }
+      selectedExercises.addAll(widget.editables!);
     }
   }
 
@@ -38,37 +36,36 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
     return group.exercises.where((exercise) => selectedExercises.contains(exercise.id)).length;
   }
 
-  void clear_selected(){
+  void clear_selected() {
     selectedExercises.clear();
   }
 
   Future<void> _loadGroups() async {
     setState(() {
-      isLoading = true; // Ustaw flagę ładowania
+      isLoading = true;
     });
 
-    // Pobierz dane z GroupsManager
     await GroupsManager.gManager.initiateOrClearGroups(null, "A-Z");
     List<Groups> loadedGroups = await GroupsManager.gManager.groups;
 
-    // Usuń grupy, których pole 'exercises' jest puste
+    // Usuń grupy bez ćwiczeń
     List<Groups> filteredGroups = loadedGroups.where((group) => group.exercises.isNotEmpty).toList();
+    print("Loaded Groups: ${filteredGroups.length}"); // Debugging
 
     setState(() {
-      groups = filteredGroups; // Przypisz przefiltrowane grupy
-      isLoading = false; // Wyłącz flagę ładowania
+      groups = filteredGroups;
+      isLoading = false;
     });
   }
-
 
   void _onExerciseChecked(int exerciseId, bool isSelected) {
     setState(() {
       if (isSelected) {
         if (!selectedExercises.contains(exerciseId)) {
-          selectedExercises.add(exerciseId); // Dodaj, jeśli nie ma na liście
+          selectedExercises.add(exerciseId);
         }
       } else {
-        selectedExercises.remove(exerciseId); // Usuń, jeśli jest odznaczony
+        selectedExercises.remove(exerciseId);
       }
     });
   }
@@ -99,7 +96,9 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
             ),
             Expanded(
               child: isLoading
-                  ? Center(child: CircularProgressIndicator()) // Pokaż loader, gdy dane są ładowane
+                  ? Center(child: CircularProgressIndicator())
+                  : groups.isEmpty
+                  ? Center(child: Text("No groups available."))
                   : ListView.builder(
                 padding: const EdgeInsets.all(8.0),
                 itemCount: groups.length,
@@ -107,6 +106,7 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                   Groups group = groups[index];
                   bool isExpanded = expandedGroups[group.id] ?? false;
                   int nofSelected = getSelectedExercisesCountForGroup(group);
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5.0),
                     child: Card(
@@ -128,15 +128,13 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                               ),
                               child: Row(
                                 children: [
-                                  // Leading (Image)
                                   Image.asset(
                                     group.iconPath,
                                     width: 64,
                                     height: 64,
                                     fit: BoxFit.cover,
                                   ),
-                                  const SizedBox(width: 20), // Dodaj odstęp między obrazkiem a tekstem
-                                  // Title and Subtitle (Group Name and Exercises Info)
+                                  const SizedBox(width: 20),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,37 +143,36 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                                           group.name,
                                           style: const TextStyle(fontSize: 23),
                                         ),
-                                        const SizedBox(height: 12), // Dodaj odstęp między nazwą grupy a liczbą ćwiczeń
+                                        const SizedBox(height: 12),
                                         Text(
                                           "${group.exercises.length} exercises",
                                           style: const TextStyle(fontSize: 18),
                                         ),
-                                        const SizedBox(height: 4), // Dodaj odstęp między liczbą ćwiczeń a zaznaczonymi
+                                        const SizedBox(height: 4),
                                         Text(
-                                          nofSelected > 0 ?
-                                          "${nofSelected} selected"
-                                          : "None selected",
-                                          style: const TextStyle(fontSize: 18, color: Color(0xFF2A8CBB),), // Zmieniony kolor tekstu
+                                          nofSelected > 0 ? "${nofSelected} selected" : "None selected",
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            color: Color(0xFF2A8CBB),
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  // Trailing (Icon)
                                   Icon(
                                     isExpanded ? Icons.expand_less : Icons.expand_more,
-                                    size: 28, // Ustaw rozmiar ikony
+                                    size: 28,
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          if(group.exercises.isNotEmpty)
+                          if (isExpanded)
                             AnimatedSwitcher(
-                              duration: Duration(milliseconds: 300), // Animowane przełączanie
+                              duration: Duration(milliseconds: 300),
                               reverseDuration: Duration(milliseconds: 300),
-                              child: isExpanded
-                                  ? Column(
-                                key: ValueKey(group.id), // Klucz do rozpoznania unikalnego elementu
+                              child: Column(
+                                key: ValueKey(group.id),
                                 children: [
                                   Divider(),
                                   Padding(
@@ -185,7 +182,10 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                                         return CheckboxListTile(
                                           activeColor: const Color(0xFF2A8CBB),
                                           value: selectedExercises.contains(exercise.id),
-                                          title: Text(exercise.name,style: TextStyle(fontSize: 18),),
+                                          title: Text(
+                                            exercise.name,
+                                            style: TextStyle(fontSize: 18),
+                                          ),
                                           onChanged: (bool? value) {
                                             _onExerciseChecked(exercise.id!, value!);
                                           },
@@ -194,8 +194,7 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                                     ),
                                   ),
                                 ],
-                              )
-                                  : SizedBox.shrink(),
+                              ),
                             ),
                         ],
                       ),
@@ -205,7 +204,7 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 18,right: 18,top: 12,bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   foregroundColor: const Color(0xFF2A8CBB),
@@ -213,27 +212,19 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  minimumSize: Size(double.infinity, 50),
                   side: BorderSide(color: Color(0xFF2A8CBB), width: 1),
                 ),
-                onPressed: () async {
-                  setState(() {
-                    clear_selected();
-                  });
-                },
+                onPressed: clear_selected,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        "CLEAR ALL",
-                        style: TextStyle(
-                          color: Color(0xFF2A8CBB),
-                          fontSize: 22,
-                          fontFamily: 'Jaapokki',
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    "CLEAR ALL",
+                    style: TextStyle(
+                      color: Color(0xFF2A8CBB),
+                      fontSize: 22,
+                      fontFamily: 'Jaapokki',
+                    ),
                   ),
                 ),
               ),
@@ -247,25 +238,28 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  minimumSize: Size(double.infinity, 50),
                 ),
                 onPressed: () async {
-                  if(selectedExercises.isNotEmpty){
+                  if (selectedExercises.isNotEmpty) {
                     List<Exercise> exercises = await DatabaseHelper().getExercisesByIds(selectedExercises);
-                    Groups ot_group = Groups(name: "Temporary group",
-                        iconPath: 'assets/group_icons/typeL0.png', exercises: exercises);
-                    if(context.mounted){
+                    Groups ot_group = Groups(
+                      name: "Temporary group",
+                      iconPath: 'assets/group_icons/typeL0.png',
+                      exercises: exercises,
+                    );
+                    if (context.mounted) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => AcceptGroup(
-                              selectedGroup: ot_group,)), // Trzecia klasa przekierowująca
+                          builder: (context) => AcceptGroup(selectedGroup: ot_group),
+                        ),
                       );
                     }
-                  }
-                  else{
+                  } else {
                     const snackBar = SnackBar(
                       content: Text(
-                        'You need to pick at least 1 exercise!!',
+                        'You need to pick at least 1 exercise!',
                         style: TextStyle(color: Colors.black),
                       ),
                       duration: Duration(seconds: 2),
@@ -276,18 +270,13 @@ class _PickGroupGroupsState extends State<PickGroupGroups> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        "ALL SELECTED",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontFamily: 'Jaapokki',
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    "ALL SELECTED",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontFamily: 'Jaapokki',
+                    ),
                   ),
                 ),
               ),

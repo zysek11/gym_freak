@@ -81,7 +81,7 @@ class _PickWorkoutState extends State<PickWorkout> {
       backgroundColor: Color(0xFF2A8CBB),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 30, horizontal: 25),
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 25),
           child: Column(
             mainAxisSize: MainAxisSize.max, // Maksymalny rozmiar kolumny
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

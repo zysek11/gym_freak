@@ -95,6 +95,19 @@ class _ExercisesPageState extends State<ExercisesPage> {
               // Równomierne ułożenie przycisków w poziomie
               children: [
                 TextButton(
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                        color: Color(0xFF2A8CBB),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Zamknięcie dialogu
+                  },
+                ),
+                TextButton(
                   style: TextButton.styleFrom(
                     backgroundColor: Color(0xFF2A8CBB), // Kolor tła przycisku
                     padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), // Padding wewnątrz przycisku
@@ -124,20 +137,6 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       GroupsManager.gManager.sortGroups(selected_optionB);
                     }
                     showMore = -1;
-                  },
-                ),
-
-                TextButton(
-                  child: Text(
-                    "Cancel",
-                    style: TextStyle(
-                        color: Color(0xFF2A8CBB),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Zamknięcie dialogu
                   },
                 ),
               ],

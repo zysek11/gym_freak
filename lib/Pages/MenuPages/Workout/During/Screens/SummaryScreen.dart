@@ -207,7 +207,7 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
               ),
               SizedBox(height: 10,),
               TrainingButton(
-                  text: 'Add missing exercises',
+                  text: 'ADD MISSING EXERCISES',
                   onPressed: _showAddExerciseDialog
               ),
               SizedBox(height: 10,),

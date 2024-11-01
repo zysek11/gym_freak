@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/WorkoutPage.dart';
+import 'package:gym_freak/database_classes/Measurement.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../database_classes/DatabaseHelper.dart';
@@ -26,15 +27,11 @@ class _StarterFourState extends State<StarterFour> {
     // Tworzenie profilu z imieniem, reszta pól ustawiona na domyślne wartości
     Profile profile = Profile(
       name: name,
-      age: 0,
-      weight: 0.0,
-      height: 0.0,
-      date: DateTime.now(),
+      dob: 0,
     );
-
-    // Zapisywanie profilu do bazy danych
     await DatabaseHelper().insertProfile(profile);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,6 +194,6 @@ class _StarterFourState extends State<StarterFour> {
           ],
         ),
       ),
-    );;
+    );
   }
 }

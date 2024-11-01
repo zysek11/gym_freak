@@ -3,6 +3,8 @@ import 'package:path/path.dart';
 import 'Exercise.dart';
 import 'ExerciseWrapper.dart';
 import 'Group.dart';
+import 'Measurement.dart';
+import 'Supplement.dart';
 import 'Workout.dart';
 import 'Profile.dart';
 
@@ -66,14 +68,183 @@ class DatabaseHelper {
         CREATE TABLE profiles (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT,
-          age INTEGER,
-          weight REAL,
-          height REAL,
-          date TEXT
+          dob INTEGER
+        )
+      ''');
+
+        await db.execute('''
+        CREATE TABLE measurement (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          value REAL,
+          unit TEXT,
+          date TEXT,
+          active INTEGER,
+          profile_id INTEGER,
+          FOREIGN KEY (profile_id) REFERENCES profiles(id)
+        )
+      ''');
+
+        await db.execute('''
+        CREATE TABLE supplement (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          value REAL,
+          unit TEXT,
+          dateOfStart TEXT,
+          dateOfEnd TEXT,
+          active INTEGER,
+          profile_id INTEGER,
+          FOREIGN KEY (profile_id) REFERENCES profiles(id)
         )
       ''');
       },
       version: 1,
+    );
+  }
+
+
+  Future<void> insertMeasurement(Measurement measurement) async {
+    final db = await database;
+    await db.insert(
+      'measurement',
+      measurement.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> insertMeasurements(List<Measurement> measurements) async {
+    final db = await database;
+
+    // Start a batch operation
+    Batch batch = db.batch();
+
+    // Loop through each measurement in the list
+    for (var measurement in measurements) {
+      batch.insert(
+        'measurement',
+        measurement.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    // Commit the batch (this executes all the inserts)
+    await batch.commit(noResult: true);
+  }
+
+
+  Future<List<Measurement>> getLatestMeasurementsByProfile(int profileId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    SELECT name, id, value, unit, MAX(date) as date, profile_id
+    FROM measurement
+    WHERE profile_id = ?
+    GROUP BY name
+    ORDER BY date DESC;
+  ''', [profileId]);
+
+    return List.generate(maps.length, (i) {
+      return Measurement.fromMap(maps[i]);
+    });
+  }
+
+
+
+  Future<void> updateMeasurement(Measurement measurement) async {
+    final db = await database;
+    await db.update(
+      'measurement',
+      measurement.toMap(),
+      where: 'id = ?',
+      whereArgs: [measurement.id],
+    );
+  }
+
+  Future<void> deleteMeasurement(int id) async {
+    final db = await database;
+    await db.delete(
+      'measurement',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteMeasurementsByName(String name) async {
+    final db = await database;
+    await db.delete(
+      'measurement',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+  }
+
+  Future<bool> checkMeasurementByName(String name) async {
+    final db = await database;
+    final List<Map<String, dynamic>> results = await db.query(
+      'measurement',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+    return results.isEmpty;
+  }
+
+
+  Future<List<Measurement>> getMeasurementsByNameSortedByDate(String name) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'measurement',
+      where: 'name = ?',
+      whereArgs: [name],
+      orderBy: 'date DESC', // Sortowanie rosnąco według daty
+    );
+
+    return List.generate(maps.length, (i) {
+      return Measurement.fromMap(maps[i]);
+    });
+  }
+
+
+  Future<void> insertSupplement(Supplement supplement) async {
+    final db = await database;
+    await db.insert(
+      'supplement',
+      supplement.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // Get all supplements for a specific profile
+  Future<List<Supplement>> getSupplementsByProfile(int profileId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'supplement',
+      where: 'Pid = ?',
+      whereArgs: [profileId],
+    );
+    return List.generate(maps.length, (i) {
+      return Supplement.fromMap(maps[i]);
+    });
+  }
+
+  // Update an existing supplement
+  Future<void> updateSupplement(Supplement supplement) async {
+    final db = await database;
+    await db.update(
+      'supplement',
+      supplement.toMap(),
+      where: 'id = ?',
+      whereArgs: [supplement.id],
+    );
+  }
+
+  // Delete a supplement from the database
+  Future<void> deleteSupplement(int id) async {
+    final db = await database;
+    await db.delete(
+      'supplement',
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 
@@ -161,6 +332,21 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return ExerciseWrapper.fromMap(maps[i]);
     });
+  }
+
+  Future<List<String>> getExerciseTypesByIds(List<int> exerciseIds) async {
+    final db = await database;
+
+    // Convert the list of IDs to a comma-separated string
+    final String ids = exerciseIds.join(',');
+
+    // Query the database to get distinct types of exercises for the given IDs
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      'SELECT DISTINCT type FROM exercises WHERE id IN ($ids)',
+    );
+
+    // Map the result to a list of types and return
+    return result.map((row) => row['type'] as String).toList();
   }
 
   Future<void> deleteExerciseController(int id) async {
