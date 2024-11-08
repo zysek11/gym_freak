@@ -283,9 +283,9 @@ class _BodyPageState extends State<BodyPage> {
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 10),
-                  Image.asset("assets/icons/bicep.png", width: 100, height: 100),
                   SizedBox(height: 20),
+                  Image.asset("assets/icons/bicep.png", width: 100, height: 100),
+                  SizedBox(height: 40),
                   Text(
                     "Best place after whole month of \nhard ass workouts.",
                     textAlign: TextAlign.center,
@@ -357,7 +357,6 @@ class _BodyPageState extends State<BodyPage> {
                 },
               ),
             ),
-
           ],
         ),
       ),

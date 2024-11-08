@@ -87,22 +87,25 @@ class DatabaseHelper {
 
         await db.execute('''
         CREATE TABLE supplement (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          value REAL,
-          unit TEXT,
-          dateOfStart TEXT,
-          dateOfEnd TEXT,
-          active INTEGER,
-          profile_id INTEGER,
-          FOREIGN KEY (profile_id) REFERENCES profiles(id)
-        )
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         name TEXT,
+         value REAL,
+         unit TEXT,
+         indefinite INTEGER,
+         dateOfStart TEXT,
+         dateOfEnd TEXT,
+         today INTEGER,
+         Profile_id INTEGER,
+         checkCounter INTEGER, 
+         counter INTEGER,
+         suppLimit INTEGER,
+         FOREIGN KEY (Profile_id) REFERENCES profiles(id)
+       )
       ''');
       },
       version: 1,
     );
   }
-
 
   Future<void> insertMeasurement(Measurement measurement) async {
     final db = await database;
@@ -204,7 +207,6 @@ class DatabaseHelper {
     });
   }
 
-
   Future<void> insertSupplement(Supplement supplement) async {
     final db = await database;
     await db.insert(
@@ -214,20 +216,15 @@ class DatabaseHelper {
     );
   }
 
-  // Get all supplements for a specific profile
-  Future<List<Supplement>> getSupplementsByProfile(int profileId) async {
+  Future<void> deleteSupplement(int id) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    await db.delete(
       'supplement',
-      where: 'Pid = ?',
-      whereArgs: [profileId],
+      where: 'id = ?',
+      whereArgs: [id],
     );
-    return List.generate(maps.length, (i) {
-      return Supplement.fromMap(maps[i]);
-    });
   }
 
-  // Update an existing supplement
   Future<void> updateSupplement(Supplement supplement) async {
     final db = await database;
     await db.update(
@@ -238,15 +235,52 @@ class DatabaseHelper {
     );
   }
 
-  // Delete a supplement from the database
-  Future<void> deleteSupplement(int id) async {
+  Future<List<Supplement>> getLatestSupplementsByProfile(int profileId) async {
     final db = await database;
-    await db.delete(
+    final List<Map<String, dynamic>> maps = await db.query(
       'supplement',
+      where: 'Profile_id = ?',
+      whereArgs: [profileId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return Supplement.fromMap(maps[i]);
+    });
+  }
+
+  Future<bool> checkSupplementByName(String name) async {
+    final db = await database;
+    final List<Map<String, dynamic>> results = await db.query(
+      'supplement',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+    return results.isEmpty;
+  }
+
+  Future<void> updateSupplementCounter(int id, int newCounterValue) async {
+    final db = await database;
+    await db.update(
+      'supplement',
+      {'counter': newCounterValue},
       where: 'id = ?',
       whereArgs: [id],
     );
   }
+
+  Future<void> updateSupplementLimitAndCounterStatus(int id, int newLimit, bool checkCounter) async {
+    final db = await database;
+    await db.update(
+      'supplement',
+      {
+        'suppLimit': newLimit,
+        'checkCounter': checkCounter ? 1 : 0,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
 
   Future<void> insertExercise(Exercise exercise) async {
     final db = await database;
