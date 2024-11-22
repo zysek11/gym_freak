@@ -445,16 +445,16 @@ class _MeasurementMapPageState extends State<MeasurementMapPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 FloatingActionButton(
+                  onPressed: () => _showAddMeasurementDialog(widget.measurementName),
+                  backgroundColor: const Color(0xFF2A8CBB),
+                  child: const Icon(Icons.add, color: Colors.white),
+                ),
+                SizedBox(height: 20,),
+                FloatingActionButton(
                   heroTag: 'deleteButton', // Unikalny heroTag
                   onPressed: () => _showDeletionDialog(widget.measurementName),
                   backgroundColor: Colors.red,
                   child: const Icon(Icons.close, color: Colors.white),
-                ),
-                SizedBox(height: 20,),
-                FloatingActionButton(
-                  onPressed: () => _showAddMeasurementDialog(widget.measurementName),
-                  backgroundColor: const Color(0xFF2A8CBB),
-                  child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
             );

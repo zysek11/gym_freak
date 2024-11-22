@@ -109,6 +109,25 @@ class TrainingManager {
     nextExercise();
   }
 
+  void redoWorkoutData(int exerciseId) {
+    // Check if the exercise exists in alreadySelected
+    print('already selected: '+ alreadySelected.toString());
+    if (alreadySelected.contains(exerciseId)) {
+      // Remove the exercise by its ID, not by index
+      alreadySelected.remove(exerciseId);
+
+      // Update the selected workout's exercises
+      workoutController!.removeExerciseFromWorkout(exerciseId);
+
+      // Adjust exerciseNumber if necessary
+      if (exerciseNumber > alreadySelected.length) {
+        exerciseNumber = alreadySelected.length;
+      }
+    }
+  }
+
+
+
   void sendSkipData(){
     alreadySelected.add(exerciseIdSelect);
     nextExercise();

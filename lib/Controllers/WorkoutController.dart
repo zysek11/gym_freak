@@ -20,6 +20,12 @@ class WorkoutController{
         ));
   }
 
+  void removeExerciseFromWorkout(int exerciseId) {
+    print('do usuniecia: ' + exerciseId.toString());
+    selectedWorkout.exercises.removeWhere((exerciseWrapper) => exerciseWrapper.exercise.id == exerciseId);
+  }
+
+
   void assignExercisesForSummary(List<Exercise> exercises) {
     selectedWorkout.exercises.clear(); // Czyszczenie listy, jeśli potrzebne
     for (var exercise in exercises) {

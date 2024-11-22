@@ -91,7 +91,7 @@ class DatabaseHelper {
          name TEXT,
          value REAL,
          unit TEXT,
-         indefinite INTEGER,
+         definite INTEGER,
          dateOfStart TEXT,
          dateOfEnd TEXT,
          today INTEGER,
@@ -99,6 +99,8 @@ class DatabaseHelper {
          checkCounter INTEGER, 
          counter INTEGER,
          suppLimit INTEGER,
+         description TEXT,
+         status INTEGER,
          FOREIGN KEY (Profile_id) REFERENCES profiles(id)
        )
       ''');
@@ -216,6 +218,25 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> resetTodayInSupplements() async {
+    final db = await database;
+    await db.update(
+      'supplement',
+      {'today': 0},
+    );
+  }
+
+  Future<void> checkStatusInSupplements(String todayDate) async {
+    final db = await database;
+    await db.update(
+        'supplement',
+        {'status': 0},
+        where: 'DATE(dateOfEnd) < DATE(?)',
+        whereArgs: [todayDate]
+    );
+  }
+
+
   Future<void> deleteSupplement(int id) async {
     final db = await database;
     await db.delete(
@@ -248,15 +269,39 @@ class DatabaseHelper {
     });
   }
 
-  Future<bool> checkSupplementByName(String name) async {
+  Future<Supplement> getSupplementById(int id) async {
     final db = await database;
-    final List<Map<String, dynamic>> results = await db.query(
+
+    final List<Map<String, dynamic>> maps = await db.query(
       'supplement',
-      where: 'name = ?',
-      whereArgs: [name],
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,  // Enforces that only one row will be returned at most
     );
-    return results.isEmpty;
+    return Supplement.fromMap(maps.first);
   }
+
+
+  Future<bool> checkSupplementByName(String name, {int? id}) async {
+    final db = await database;
+    if(id != null){
+      final List<Map<String, dynamic>> results = await db.query(
+        'supplement',
+        where: 'name = ? AND id != ?',
+        whereArgs: [name, id],
+      );
+      return results.isEmpty;
+    }
+    else{
+      final List<Map<String, dynamic>> results = await db.query(
+        'supplement',
+        where: 'name = ?',
+        whereArgs: [name],
+      );
+      return results.isEmpty;
+    }
+  }
+
 
   Future<void> updateSupplementCounter(int id, int newCounterValue) async {
     final db = await database;

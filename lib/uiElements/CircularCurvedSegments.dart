@@ -48,7 +48,7 @@ class CircleCurvedSegmentsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width / 2, size.height / 2) + 5; // Adjust radius as needed
+    final radius = min(size.width / 2, size.height / 2); // Adjust radius as needed
     final angleIncrement = 2 * pi / numberOfVertices; // Angle between each vertex
     int connCounter = 0;
 

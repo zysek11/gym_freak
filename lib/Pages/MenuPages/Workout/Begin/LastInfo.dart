@@ -65,7 +65,6 @@ class _LastInfoState extends State<LastInfo> {
                           builder: (context) =>
                               PickExerciseScreen(
                                 group: TrainingManager.tManager.selectedGroup,
-                                exerciseNumber: TrainingManager.tManager.exerciseNumber,
                                 asList: TrainingManager.tManager.alreadySelected,
                                 series: TrainingManager.tManager.series, full: widget.type,
                               ),),

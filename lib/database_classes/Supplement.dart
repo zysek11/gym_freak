@@ -3,7 +3,7 @@ class Supplement {
   String name;
   double value;
   String unit;
-  int indefiniteFlag; // Keeping as int for consistency
+  int definiteFlag; // Keeping as int for consistency
   String dateOfStart;
   String? dateOfEnd;
   int todayFlag; // Keeping as int for consistency
@@ -11,20 +11,24 @@ class Supplement {
   int checkCounterFlag; // Keeping as int for consistency
   int? counter;
   int? suppLimit;
+  String? description;
+  int status;
 
   Supplement({
     this.id,
     required this.name,
     required this.value,
     required this.unit,
-    required this.indefiniteFlag,
+    required this.definiteFlag,
     required this.dateOfStart,
     required this.todayFlag,
     required this.profileId,
     required this.checkCounterFlag,
+    required this.status,
     this.dateOfEnd,
     this.counter,
     this.suppLimit,
+    this.description
   });
 
   // Convert to a map for SQLite insertion
@@ -34,14 +38,16 @@ class Supplement {
       'name': name,
       'value': value,
       'unit': unit,
-      'indefinite': indefiniteFlag,
+      'definite': definiteFlag,
       'dateOfStart': dateOfStart,
-      'dateOfEnd': dateOfEnd ?? '', // Default empty if null
+      'dateOfEnd': dateOfEnd, // Default empty if null
       'today': todayFlag,
       'profile_id': profileId,
       'checkCounter': checkCounterFlag,
-      'counter': counter ?? 0, // Default 0 if null
-      'suppLimit': suppLimit ?? 0, // Default 0 if null
+      'counter': counter, // Default 0 if null
+      'suppLimit': suppLimit, // Default 0 if null
+      'description': description,
+      'status': status
     };
   }
 
@@ -52,14 +58,16 @@ class Supplement {
       name: map['name'] ?? '',
       value: (map['value'] as num?)?.toDouble() ?? 0.0,
       unit: map['unit'] ?? '',
-      indefiniteFlag: map['indefinite'] ?? 0,
-      dateOfStart: map['dateOfStart'] ?? '',
+      definiteFlag: map['definite'] ?? 0,
+      dateOfStart: map['dateOfStart'],
       dateOfEnd: map['dateOfEnd'],
       todayFlag: map['today'] ?? 0,
       profileId: map['profile_id'] ?? 1,
       checkCounterFlag: map['checkCounter'] ?? 0,
       counter: map['counter'],
       suppLimit: map['suppLimit'],
+      description: map['description'],
+      status: map['status']
     );
   }
 }

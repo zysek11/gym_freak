@@ -25,10 +25,18 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
     workout = TrainingManager.tManager.workoutController!.selectedWorkout;
   }
 
+  Iterable<int> getExerciseIds(Workout workout) {
+    // Assuming `workout` has a list of `ExerciseWrapper` objects, each containing an `Exercise`
+    return workout.exercises
+        .map((wrapper) => wrapper.exercise.id) // Extract the ID from each Exercise
+        .whereType<int>(); // Filter out null IDs and keep only valid integers
+  }
+  
   void removeSet(ExerciseWrapper exercise, int setIndex) {
     setState(() {
       exercise.weights?.removeAt(setIndex);
       exercise.repetitions?.removeAt(setIndex);
+      exercise.series -= 1;
     });
   }
 
@@ -43,6 +51,7 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
     setState(() {
       exercise.weights?.add(0); // Dodajemy nową wagę (domyślnie 0 kg)
       exercise.repetitions?.add(0); // Dodajemy nową liczbę powtórzeń (domyślnie 0 powtórzeń)
+      exercise.series += 1;
     });
 
     // Po dodaniu seta od razu pokazujemy dialog do edycji
@@ -57,7 +66,7 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return ExerciseSelectionDialog(group: TrainingManager.tManager.selectedGroup);
+        return ExerciseSelectionDialog(exerciseIds: getExerciseIds(workout),);
       },
     ).then((_) {
       setState(() {}); // Refresh the screen after adding an exercise

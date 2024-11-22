@@ -3,6 +3,7 @@ import 'package:gym_freak/Managers/TrainingManager.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../../database_classes/Group.dart';
 import '../../../../../database_classes/Exercise.dart';
+import '../../../Exercises/PickGroupExercises.dart';
 import '../WorkoutWidgets.dart';
 import 'BeforeScreen.dart';
 import 'CardComponent.dart';
@@ -10,7 +11,6 @@ import 'SummaryScreen.dart';
 
 class PickExerciseScreen extends StatefulWidget {
   final Groups group;
-  final int exerciseNumber;
   final List<int> asList;
   final int series;
   final bool full;
@@ -18,7 +18,6 @@ class PickExerciseScreen extends StatefulWidget {
   const PickExerciseScreen({
     super.key,
     required this.group,
-    required this.exerciseNumber,
     required this.asList,
     required this.series,
     required this.full
@@ -29,8 +28,47 @@ class PickExerciseScreen extends StatefulWidget {
 }
 
 class _PickExerciseScreenState extends State<PickExerciseScreen> {
+
+  late Groups workoutGroup;
+  late List<int> workoutAsList;
+  late int workoutSeries;
+  late bool workoutFull;
+
+  void refreshWorkout(List<Exercise> mod_exercises) {
+    // Convert workoutGroup.exercises and mod_exercises to sets of IDs
+    final workoutExerciseIds = workoutGroup.exercises.map((e) => e.id).toSet();
+    final modExerciseIds = mod_exercises.map((e) => e.id).toSet();
+
+    // Find IDs to remove
+    final idsToRemove = workoutExerciseIds.difference(modExerciseIds);
+    final idsToAdd = modExerciseIds.difference(workoutExerciseIds);
+
+    // Remove exercises from workoutGroup that are not in mod_exercises
+    workoutGroup.exercises.removeWhere((exercise) => idsToRemove.contains(exercise.id));
+
+    // Add exercises from mod_exercises that are not in workoutGroup
+    workoutGroup.exercises.addAll(
+      mod_exercises.where((exercise) => idsToAdd.contains(exercise.id)),
+    );
+    for (var id in idsToRemove) {
+      print(idsToRemove);
+      TrainingManager.tManager.redoWorkoutData(id!);
+    }
+    // przypisanie do zmienny workout group itp tych danych z TrainingManagera
+    // ewentualnie zrobic tu jakis consumer
+    workoutAsList = TrainingManager.tManager.alreadySelected;
+    workoutSeries = TrainingManager.tManager.series;
+  }
+
+
+
+
   @override
   void initState() {
+    workoutGroup = widget.group;
+    workoutAsList = widget.asList;
+    workoutSeries = widget.series;
+    workoutFull = widget.full;
     super.initState();
   }
 
@@ -126,19 +164,58 @@ class _PickExerciseScreenState extends State<PickExerciseScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 const SizedBox(height: 10),
-                const Text(
-                  "WORKOUT MANAGER",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontFamily: 'Jaapokki',
-                  ),
-                ),
-                const SizedBox(height: 15),
-                widget.full ? const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: true, duringActive: false,)
+                workoutFull ? const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: true, duringActive: false,)
                   : const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: false, duringActive: false,),
                 const SizedBox(height: 20),
-                if(widget.full)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: const Color(0xFF2A8CBB),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () async {
+                      Iterable<int> exerciseIds = workoutGroup.exercises.map((exercise) => exercise.id!).toList();
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => PickGroupExercises(oneTimeW: false,editables: exerciseIds,)), // AddExercisePage to strona dodawania ćwiczenia
+                      );
+                      if (result != null) {
+                        setState(() {
+                          refreshWorkout(result);
+                        });
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 5.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: Text(
+                              "Modify exercises",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 22,
+                                fontFamily: 'Jaapokki',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+                const SizedBox(height: 20),
+                if(workoutFull)
                   Expanded(
                   child: Center(
                     child: GridView.builder(
@@ -148,22 +225,22 @@ class _PickExerciseScreenState extends State<PickExerciseScreen> {
                         crossAxisSpacing: 15,
                         childAspectRatio: 0.9,
                       ),
-                      itemCount: widget.group.exercises.length,
+                      itemCount: workoutGroup.exercises.length,
                       itemBuilder: (context, index) {
-                        Exercise exercise = widget.group.exercises[index];
-                        bool isDisabled = widget.asList.contains(index);
+                        Exercise exercise = workoutGroup.exercises[index];
+                        bool isDisabled = workoutAsList.contains(exercise.id);
 
                         return GestureDetector(
                           onTap: isDisabled
                               ? null
                               : () {
-                            TrainingManager.tManager.setExercise(index);
+                            TrainingManager.tManager.setExercise(exercise.id!);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => BeforeExerciseScreen(
                                   group: TrainingManager.tManager.selectedGroup,
-                                  exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
+                                  exerciseId: TrainingManager.tManager.exerciseIdSelect,
                                   exerciseNumber: TrainingManager.tManager.exerciseNumber,
                                   series: TrainingManager.tManager.series,
                                 ),
@@ -237,8 +314,8 @@ class _PickExerciseScreenState extends State<PickExerciseScreen> {
                   Spacer()
                 ],
                 const SizedBox(height: 20),
-                widget.full ? TrainingButton(
-                  text: TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty ? 'FINISH BEFORE': "CANCEL",
+                workoutFull ? TrainingButton(
+                  text: TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty ? 'FINISH': "CANCEL",
                   onPressed: () async {
                     if(TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty){
                       final bool shouldpop = await showExitTrainingDialog(context,

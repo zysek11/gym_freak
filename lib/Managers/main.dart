@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Controllers/GroupsController.dart';
+import 'package:gym_freak/Controllers/SupplementController.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/WorkoutPage.dart';
 import 'package:gym_freak/Pages/StarterPages/Starter1.dart';
 import 'package:provider/provider.dart';
@@ -46,6 +47,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     getCurrentAppTheme();
     getCurrentAppLanguage();
+    SupplementManager.sManager.checkAndUpdateTodayData();
   }
 
   @override
@@ -56,6 +58,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => languageProvider),
         ChangeNotifierProvider(create: (context) => ExercisesManager.eManager),
         ChangeNotifierProvider(create: (context) => GroupsManager.gManager),
+        ChangeNotifierProvider(create: (context) => SupplementManager.sManager),
       ],
       child: Consumer2<DarkThemeProvider, LanguageProvider>(
         builder: (context, themeValue, langValue, child) {

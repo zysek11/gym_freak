@@ -98,6 +98,8 @@ flutter:
     - assets/icons/vitamin.png
     - assets/icons/tape-measure.png
     - assets/icons/bicep.png
+    - assets/icons/green_flag.png
+    - assets/icons/red_flag.png
     - assets/icons/whey.png
     - assets/icons/ruler.png
     - assets/icons/vitamins.png

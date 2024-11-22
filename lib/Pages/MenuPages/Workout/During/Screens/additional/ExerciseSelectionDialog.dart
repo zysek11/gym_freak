@@ -7,14 +7,13 @@ import '../../../../../../database_classes/ExerciseWrapper.dart';
 import '../../../../../../database_classes/Group.dart';
 
 class ExerciseSelectionDialog extends StatelessWidget {
-  final Groups group;
+  final Iterable<int> exerciseIds;
 
-  const ExerciseSelectionDialog({super.key, required this.group});
+  const ExerciseSelectionDialog({super.key, required this.exerciseIds});
 
   @override
   Widget build(BuildContext context) {
     final exercisesManager = Provider.of<ExercisesManager>(context, listen: false);
-
     return FutureBuilder<List<Exercise>>(
       future: exercisesManager.exercises, // Fetching exercises asynchronously
       builder: (context, snapshot) {
@@ -46,8 +45,25 @@ class ExerciseSelectionDialog extends StatelessWidget {
               itemCount: exercises.length,
               itemBuilder: (context, index) {
                 final exercise = exercises[index];
+                final isAlreadyAdded = exerciseIds.contains(exercise.id);
+
                 return GestureDetector(
                   onTap: () {
+                    if (isAlreadyAdded) {
+                      // Show a message that the exercise is already added
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "${exercise.name} is already added.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      return;
+                    }
+
                     // Logic for adding exercise
                     TrainingManager.tManager.workoutController!.selectedWorkout.exercises.add(
                       exercise.application == 1
@@ -57,7 +73,10 @@ class ExerciseSelectionDialog extends StatelessWidget {
                         repetitions: [],
                         series: 0,
                       )
-                          : ExerciseWrapper.basic(exercise: exercise, series: 0),
+                          : ExerciseWrapper.basic(
+                        exercise: exercise,
+                        series: 0,
+                      ),
                     );
                     Navigator.of(context).pop(); // Close the dialog
                   },
@@ -65,6 +84,7 @@ class ExerciseSelectionDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
+                      color: isAlreadyAdded ? Colors.grey[300] : Colors.white,
                     ),
                     child: Row(
                       children: [
@@ -73,7 +93,10 @@ class ExerciseSelectionDialog extends StatelessWidget {
                         Expanded(
                           child: Text(
                             exercise.name,
-                            style: TextStyle(fontSize: 19, color: Colors.black),
+                            style: TextStyle(
+                              fontSize: 19,
+                              color: isAlreadyAdded ? Colors.grey : Colors.black,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
                           ),

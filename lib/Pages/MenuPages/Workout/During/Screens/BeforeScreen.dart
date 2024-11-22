@@ -1,6 +1,6 @@
-// Before
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
+import '../../../../../database_classes/Exercise.dart';
 import '../../../../../database_classes/Group.dart';
 import '../WorkoutWidgets.dart';
 import 'CardComponent.dart';
@@ -10,14 +10,14 @@ import 'SummaryScreen.dart';
 
 class BeforeExerciseScreen extends StatefulWidget {
   final Groups group;
-  final int exerciseIndex;
+  final int exerciseId;
   final int exerciseNumber;
   final int series;
 
   const BeforeExerciseScreen({
     Key? key,
     required this.group,
-    required this.exerciseIndex,
+    required this.exerciseId,
     required this.exerciseNumber,
     required this.series,
   }) : super(key: key);
@@ -27,12 +27,40 @@ class BeforeExerciseScreen extends StatefulWidget {
 }
 
 class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
+  late Exercise? currentExercise;
+
+  @override
+  void initState() {
+    super.initState();
+    // Find the exercise by ID
+    currentExercise = widget.group.exercises
+        .firstWhere((exercise) => exercise.id == widget.exerciseId);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (currentExercise == null) {
+      // Handle case where the exercise is not found
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Center(
+            child: Text(
+              'Exercise not found!',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return PopScope(
       canPop: true,
-      onPopInvoked: (didPop){
+      onPopInvoked: (didPop) {
         TrainingManager.tManager.checkUndoSeries();
       },
       child: Scaffold(
@@ -44,7 +72,11 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const TimerCardComponent(bgColor: Color(0xffffffff),breakActive: true, duringActive: false,),
+                const TimerCardComponent(
+                  bgColor: Color(0xffffffff),
+                  breakActive: true,
+                  duringActive: false,
+                ),
                 Spacer(),
                 Text(
                   "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
@@ -56,7 +88,7 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
                 ),
                 SizedBox(height: 30),
                 Text(
-                  widget.group.exercises[widget.exerciseIndex].name,
+                  currentExercise!.name,
                   textAlign: TextAlign.center,
                   maxLines: 3,
                   style: TextStyle(
@@ -84,7 +116,7 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
                       MaterialPageRoute(
                         builder: (context) => DuringExerciseScreen(
                           group: TrainingManager.tManager.selectedGroup,
-                          exerciseIndex: TrainingManager.tManager.exerciseIdSelect,
+                          exerciseId: TrainingManager.tManager.exerciseIdSelect,
                           exerciseNumber: TrainingManager.tManager.exerciseNumber,
                           series: TrainingManager.tManager.series,
                         ),
@@ -94,41 +126,26 @@ class _BeforeExerciseScreenState extends State<BeforeExerciseScreen> {
                 ),
                 SizedBox(height: 20),
                 TrainingButton(
-                  text: widget.series == 1 ? 'SKIP EXERCISE': "EXERCISE DONE",
+                  text: widget.series == 1 ? 'SKIP EXERCISE' : "EXERCISE DONE",
                   onPressed: () {
-                    if(widget.series == 1){
+                    if (widget.series == 1) {
                       TrainingManager.tManager.sendSkipData();
+                    } else if (widget.series != 1) {
+                      TrainingManager.tManager
+                          .sendWorkoutData(currentExercise!);
                     }
-                    else if(widget.series != 1){
-                      TrainingManager.tManager.sendWorkoutData(widget.group.exercises[widget.exerciseIndex]);
-                    }
-                    if (widget.group.exercises.length > widget.exerciseNumber + 1) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              PickExerciseScreen(
-                                group: TrainingManager.tManager.selectedGroup,
-                                exerciseNumber: TrainingManager.tManager.exerciseNumber,
-                                asList: TrainingManager.tManager.alreadySelected,
-                                series: TrainingManager.tManager.series, full: true,
-                              ),),
-                            (Route<dynamic> route) => route.isFirst,
-                      );
-                    } else {
-                      if(TrainingManager.tManager.workoutController!.selectedWorkout.exercises.isNotEmpty){
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                            const SummaryExerciseScreen(),),
-                              (Route<dynamic> route) => route.isFirst,
-                        );
-                      }
-                      else {
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      }
-                    }
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PickExerciseScreen(
+                          group: TrainingManager.tManager.selectedGroup,
+                          asList: TrainingManager.tManager.alreadySelected,
+                          series: TrainingManager.tManager.series,
+                          full: true,
+                        ),
+                      ),
+                          (Route<dynamic> route) => route.isFirst,
+                    );
                   },
                 ),
               ],

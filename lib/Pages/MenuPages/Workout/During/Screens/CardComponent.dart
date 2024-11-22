@@ -43,7 +43,7 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                   manager.selectedGroup.name,
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 28,
+                    fontSize: 25,
                     fontFamily: 'Jaapokki',
                   ),
                 ),
@@ -78,15 +78,15 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                         "Total Time",
                         style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 24,
+                          fontSize: 22,
                           fontFamily: 'Jaapokki',
                         ),
                       ),
                       Spacer(),
                       Image.asset(
                         "assets/icons/clock.png",
-                        width: 40,
-                        height: 40,
+                        width: 35,
+                        height: 35,
                         fit: BoxFit.cover,
                       ),
                       const SizedBox(width: 20),
@@ -94,7 +94,7 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                         "$minutes:$seconds",
                         style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 24,
+                          fontSize: 22,
                           fontFamily: 'Jaapokki',
                         ),
                       ),
@@ -144,15 +144,15 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                                     "Break",
                                     style: const TextStyle(
                                       color: Colors.black,
-                                      fontSize: 24,
+                                      fontSize: 22,
                                       fontFamily: 'Jaapokki',
                                     ),
                                   ),
                                   Spacer(),
                                   Image.asset(
                                     "assets/icons/procrastination.png",
-                                    width: 40,
-                                    height: 40,
+                                    width: 35,
+                                    height: 35,
                                     fit: BoxFit.cover,
                                   ),
                                   const SizedBox(width: 20),  // Space between the image and text
@@ -160,7 +160,7 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                                     "$minutes:$seconds",
                                     style: const TextStyle(
                                       color: Colors.black,
-                                      fontSize: 24,
+                                      fontSize: 22,
                                       fontFamily: 'Jaapokki',
                                     ),
                                   ),
@@ -172,7 +172,7 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                                       child: Icon(
                                         Icons.cancel,
                                         color: Colors.grey,  // Optional: Add color to the icon
-                                        size: 26,  // Adjust icon size as needed
+                                        size: 24,  // Adjust icon size as needed
                                       ),
                                     ),
                                   ),
@@ -193,8 +193,8 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                           children: [
                             Image.asset(
                               "assets/icons/procrastination.png",
-                              width: 40,
-                              height: 40,
+                              width: 35,
+                              height: 35,
                               fit: BoxFit.cover,
                             ),
                             const SizedBox(width: 20),
@@ -202,7 +202,7 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
                               "Add break time",
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 24,
+                                fontSize: 22,
                                 fontFamily: 'Jaapokki',
                               ),
                             ),
