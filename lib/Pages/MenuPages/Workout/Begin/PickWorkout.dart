@@ -94,51 +94,43 @@ class _PickWorkoutState extends State<PickWorkout> {
                   fontFamily: 'Jaapokki',
                 ),
               ),
-              _buildNavigationButton(
-                context,
-                "Pick or combine groups",
-                "Pick one group or combine exercises from all of the groups."
-                    " You can use them as one workout.",
-                "assets/screens/screen1s.png",
-                    () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            PickGroupGroups()), // Pierwsza klasa przekierowująca
-                  );
-                },
-              ),
-              _buildNavigationButton(
-                context,
-                "Select exercises",
-                "Pick specific exercises to build your workout. "
-                    "Doesn't matter if they belong to any group.",
-                "assets/screens/screen2s.png",
-                    () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PickGroupExercises(
-                            oneTimeW: true)), // Druga klasa przekierowująca
-                  );
-                },
-              ),
-              _buildNavigationButton(
-                context,
-                "Create a new group",
-                "Builds a new group of exercises for now and future workouts."
-                    "Then you need to pick it.",
-                "assets/screens/screen3s.png",
-                    () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddGroup(
-                            edit: false)), // Trzecia klasa przekierowująca
-                  );
-                },
-              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildNavigationButton(
+                      context,
+                      "Pick or combine groups",
+                      "Pick one group or combine exercises from all of the groups."
+                          " You can use them as one workout.",
+                      "assets/screens/screen1s.png",
+                          () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  PickGroupGroups()), // Pierwsza klasa przekierowująca
+                        );
+                      },
+                    ),
+                    _buildNavigationButton(
+                      context,
+                      "Select exercises",
+                      "Pick specific exercises to build your workout. "
+                          "Doesn't matter if they belong to any group.",
+                      "assets/screens/screen2s.png",
+                          () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PickGroupExercises(
+                                  oneTimeW: true)), // Druga klasa przekierowująca
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),

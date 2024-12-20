@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 
 import '../../../Controllers/ExerciseTypesManager.dart';
@@ -19,8 +22,10 @@ class AddExercise extends StatefulWidget {
 
 class _AddExerciseState extends State<AddExercise> {
   // Editable - controllers and other for loading data or initiating
+  final ImagePicker _picker = ImagePicker();
   late String selectedImage; // Domyślny obrazek
-  late int selectedImageIndex;
+  late String selectedIcon;
+  late int selectedIconIndex;
   late bool check_applic;
   MultiSelectController msc = MultiSelectController();
   TextEditingController name_tec = TextEditingController();
@@ -29,7 +34,7 @@ class _AddExerciseState extends State<AddExercise> {
   bool _isLoading = true;
   late List<Groups> groups;
 
-  final List<String> images = List.generate(
+  final List<String> icons = List.generate(
     8,
         (index) => 'assets/workout_icons/typeL$index.png',
   );
@@ -38,14 +43,15 @@ class _AddExerciseState extends State<AddExercise> {
 
   void initializeData() {
     check_applic = true;
-    selectedImage = 'assets/workout_icons/typeL0.png';
-    selectedImageIndex = 0;
+    selectedImage = '';
+    selectedIcon = 'assets/workout_icons/typeL0.png';
+    selectedIconIndex = 0;
     selectedCategory = _exerciseTypesManager.allExercises.first['name'];
   }
 
   void loadData() {
-    selectedImage = removeL(widget.exercise!.iconPath);
-    selectedImageIndex = getImageIndex(selectedImage);
+    selectedImage = widget.exercise!.imagePath;
+    selectedIconIndex = getImageIndex(selectedIcon);
     name_tec.text = widget.exercise!.name;
     selectedCategory = widget.exercise!.type;
     check_applic = widget.exercise!.application == 0 ? false : true;
@@ -119,30 +125,12 @@ class _AddExerciseState extends State<AddExercise> {
     return groups.map((group) => ValueItem(label: group.name, value: group.id)).toList();
   }
 
-  List<Groups> _valueItemsToGroupList(List<ValueItem> selectedGroups) {
-    List<Groups> matchedGroups = [];
-    // Iteruj po wszystkich dostępnych grupach
-    for (var group in groups) {
-      // Sprawdź, czy id grupy pokrywa się z value w selectedGroups
-      for (var selectedGroup in selectedGroups) {
-        if (group.id == selectedGroup.value) {
-          matchedGroups.add(group); // Dodaj grupę do listy, jeśli jest zgodność
-          break; // Przestań iterować po selectedGroups, jeśli dopasowanie zostało znalezione
-        }
-      }
-    }
-    return matchedGroups;
-  }
+  List<Groups> _valueItemsToGroupList(List<ValueItem> selectedGroups) =>
+      groups.where((group) => selectedGroups.any((selected) => group.id == selected.value)).toList();
 
-  void onChanged(bool? value) {
+  void onCheckboxChanged(bool? value, bool invert) {
     setState(() {
-      check_applic = value ?? false;
-    });
-  }
-
-  void onChanged2(bool? value) {
-    setState(() {
-      check_applic = !value!;
+      check_applic = invert ? !(value ?? true) : (value ?? false);
     });
   }
 
@@ -157,7 +145,8 @@ class _AddExerciseState extends State<AddExercise> {
         name: name_tec.text,
         type: selectedCategory,
         application: check_applic ? 1 : 0,
-        iconPath: images[selectedImageIndex],
+        imagePath: selectedImage,
+        iconPath: icons[selectedIconIndex],
         groups: _valueItemsToGroupList(msc.selectedOptions), // Przechowujemy teraz obiekty Groups
         description: desc_tec.text,
       );
@@ -176,7 +165,8 @@ class _AddExerciseState extends State<AddExercise> {
         name: name_tec.text,
         type: selectedCategory,
         application: check_applic ? 1 : 0,
-        iconPath: images[selectedImageIndex],
+        imagePath: selectedImage,
+        iconPath: icons[selectedIconIndex],
         groups: _valueItemsToGroupList(msc.selectedOptions), // Przechowujemy teraz obiekty Groups
         description: desc_tec.text,
       );
@@ -203,6 +193,15 @@ class _AddExerciseState extends State<AddExercise> {
     return index;
   }
 
+  Future<void> pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        selectedImage = pickedFile.path;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -225,16 +224,21 @@ class _AddExerciseState extends State<AddExercise> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: double.infinity,
-                      height: 200,
-                      color: Colors.grey[100],
-                      child: Center(
-                        child: Image.asset(
-                          selectedImage,
-                          width: 128,
-                          height: 128,
-                          fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: (){
+                        pickImage();
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 200,
+                        color: Colors.grey[100],
+                        child: Center(
+                          child: selectedImage != '' ? Image.file(
+                            File(selectedImage),
+                            height: 200,
+                            fit: BoxFit.contain,
+                          ) :
+                          Icon(Icons.add,size: 128, color: Colors.grey.shade500,),
                         ),
                       ),
                     ),
@@ -257,23 +261,23 @@ class _AddExerciseState extends State<AddExercise> {
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                         ),
-                        itemCount: images.length,
+                        itemCount: icons.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
                             onTap: () {
                               setState(() {
-                                selectedImage = images[index].replaceAll('L', '');
-                                selectedImageIndex = index;
+                                selectedIcon = icons[index].replaceAll('L', '');
+                                selectedIconIndex = index;
                               });
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: selectedImageIndex == index
+                                color: selectedIconIndex == index
                                     ? Color(0xFFA5EEFF)
                                     : Colors.grey[100],
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Image.asset(images[index]),
+                              child: Image.asset(icons[index]),
                             ),
                           );
                         },
@@ -391,7 +395,7 @@ class _AddExerciseState extends State<AddExercise> {
                           Checkbox(
                             value: check_applic,
                             activeColor: Color(0xFF2A8CBB),
-                            onChanged: onChanged,
+                            onChanged: (value) => onCheckboxChanged(value, false),
                           ),
                           Text(
                             "Basic, with weight and repeats",
@@ -407,7 +411,7 @@ class _AddExerciseState extends State<AddExercise> {
                           Checkbox(
                             value: !check_applic,
                             activeColor: Color(0xFF2A8CBB),
-                            onChanged: onChanged2,
+                            onChanged: (value) => onCheckboxChanged(value, true),
                           ),
                           Text(
                             "Shortened, with sets only",

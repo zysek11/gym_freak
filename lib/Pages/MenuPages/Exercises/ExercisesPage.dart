@@ -172,7 +172,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                   Expanded(
                     child: TextFormField(
                       controller: tec_search,
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(fontSize: 20),
                       decoration: InputDecoration(
                         hintText: 'search exercise or group',
                         border: InputBorder.none,
@@ -201,7 +201,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                   ),
                   Icon(
                     Icons.search,
-                    size: 30,
+                    size: 25,
                   ),
                 ],
               ),
@@ -210,7 +210,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
               height: 20,
             ),
             Container(
-              padding: EdgeInsets.symmetric(vertical: 20),
+              padding: EdgeInsets.symmetric(vertical: 15),
               color: Color(0xFF2A8CBB),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -237,7 +237,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       child: Text(
                         "Exercises",
                         style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             color: Colors.white,
                             fontWeight: FontWeight.w600),
                       ),
@@ -264,7 +264,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       child: Text(
                         "Groups",
                         style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             color: Colors.white,
                             fontWeight: FontWeight.w600),
                       ),
@@ -447,7 +447,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                           child: Text(
                                                             exercise.name,
                                                             style: TextStyle(
-                                                              fontSize: 20,
+                                                              fontSize: 18,
                                                               color: Colors.black,
                                                               fontFamily: 'Lato',
                                                               fontWeight: FontWeight.w400,
@@ -460,7 +460,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                         SizedBox(width: 10,),
                                                         Icon(
                                                           Icons.keyboard_arrow_down_rounded,
-                                                          size: 22,
+                                                          size: 20,
                                                         )
                                                       ],
                                                     ),
@@ -484,7 +484,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                     Text(
                                                       "type:",
                                                       style: TextStyle(
-                                                          fontSize: 18,
+                                                          fontSize: 16,
                                                           color: Colors.black,
                                                           fontFamily:
                                                           'Lato',
@@ -498,7 +498,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                                       exercise.type
                                                           .toLowerCase(),
                                                       style: TextStyle(
-                                                          fontSize: 18,
+                                                          fontSize: 16,
                                                           color: Colors.black,
                                                           fontFamily:
                                                           'Lato',

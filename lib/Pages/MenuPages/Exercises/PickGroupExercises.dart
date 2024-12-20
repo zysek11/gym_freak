@@ -194,7 +194,7 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
                                   Text(
                                     exercise.name,
                                     style: TextStyle(
-                                      fontSize: 21,
+                                      fontSize: 20,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -202,7 +202,7 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
                                   Text(
                                     exercise.type,
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 17,
                                       color: Color(0xFF2A8CBB),
                                     ),
                                   ),
@@ -239,7 +239,7 @@ class _PickGroupExercisesState extends State<PickGroupExercises> {
                               "CLEAR ALL",
                               style: TextStyle(
                                 color: Color(0xFF2A8CBB),
-                                fontSize: 22,
+                                fontSize: 20,
                                 fontFamily: 'Jaapokki',
                               ),
                             ),

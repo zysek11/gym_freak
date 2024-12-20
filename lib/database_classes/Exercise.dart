@@ -6,6 +6,7 @@ class Exercise {
   String name;
   String type;
   int application;
+  String imagePath;
   String iconPath;
   String description;
   List<Groups>? groups; // Zmieniono na opcjonalne
@@ -15,6 +16,7 @@ class Exercise {
     required this.name,
     required this.type,
     required this.application,
+    required this.imagePath,
     required this.iconPath,
     this.groups, // Pole opcjonalne
     required this.description,
@@ -27,6 +29,7 @@ class Exercise {
       'name': name,
       'type': type,
       'application': application,
+      'imagePath': imagePath,
       'iconPath': iconPath,
       // Jeśli groups nie jest nullem, konwertuj na JSON, w przeciwnym razie zwróć pustą listę
       'groups': groups != null
@@ -43,6 +46,7 @@ class Exercise {
       name: map['name'] ?? '',
       type: map['type'] ?? '',
       application: map['application'] ?? 0,
+      imagePath: map['imagePath'] ?? '',
       iconPath: map['iconPath'] ?? '',
       // Jeśli 'groupName' jest nullem lub pustą listą, zwróć null
       groups: map['groups'] != null && map['groups'].isNotEmpty

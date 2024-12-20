@@ -7,6 +7,7 @@ abstract class Cloneable {
 
 class Workout {
   final int? id;
+  late String name;
   late List<ExerciseWrapper> exercises;
   DateTime date;
   late double intensity;
@@ -24,6 +25,7 @@ class Workout {
   // Konstruktor pełny dla Workout
   Workout.full({
     this.id,
+    required this.name,
     required this.exercises,
     required this.date,
     required this.intensity,
@@ -35,6 +37,7 @@ class Workout {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'name': name,
       'exercises': jsonEncode(exercises.map((e) => e.toMap()).toList()), // Zapisujemy jako JSON
       'date': date.toIso8601String(),
       'intensity': intensity,
@@ -47,6 +50,7 @@ class Workout {
   factory Workout.fromMap(Map<String, dynamic> map) {
     return Workout.full(
       id: map['id'] ?? 0,
+      name: map['name'],
       exercises: List<ExerciseWrapper>.from((jsonDecode(map['exercises']) as List).map((e) => ExerciseWrapper.fromMap(e))),
       date: DateTime.parse(map['date']),
       intensity: map['intensity'],

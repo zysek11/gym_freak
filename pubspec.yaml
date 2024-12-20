@@ -44,6 +44,7 @@ dependencies:
   lottie: ^3.1.2
   flutter_rating_bar: ^4.0.1
   intl: ^0.19.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -103,6 +104,12 @@ flutter:
     - assets/icons/whey.png
     - assets/icons/ruler.png
     - assets/icons/vitamins.png
+    - assets/icons/calendar_empty.png
+    - assets/icons/calendar_full.png
+    - assets/icons/report.png
+    - assets/icons/bench_press.png
+    - assets/icons/satisfaction.png
+    - assets/icons/intensity.png
     - assets/workout_icons/
     - assets/group_icons/
     - assets/screens/

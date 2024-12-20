@@ -4,84 +4,139 @@ import '../../../../../../Controllers/ExercisesController.dart';
 import '../../../../../../Managers/TrainingManager.dart';
 import '../../../../../../database_classes/Exercise.dart';
 import '../../../../../../database_classes/ExerciseWrapper.dart';
-import '../../../../../../database_classes/Group.dart';
 
-class ExerciseSelectionDialog extends StatelessWidget {
+class ExerciseSelectionDialog extends StatefulWidget {
   final Iterable<int> exerciseIds;
 
   const ExerciseSelectionDialog({super.key, required this.exerciseIds});
 
   @override
-  Widget build(BuildContext context) {
+  State<ExerciseSelectionDialog> createState() => _ExerciseSelectionDialogState();
+}
+
+class _ExerciseSelectionDialogState extends State<ExerciseSelectionDialog> {
+  String searchQuery = ""; // To store the search query
+  late Future<List<Exercise>> exercisesFuture; // Fetch exercises
+
+  @override
+  void initState() {
+    super.initState();
     final exercisesManager = Provider.of<ExercisesManager>(context, listen: false);
+    exercisesFuture = exercisesManager.exercises;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<List<Exercise>>(
-      future: exercisesManager.exercises, // Fetching exercises asynchronously
+      future: exercisesFuture, // Fetching exercises asynchronously
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator()); // Loading screen
+          return const Center(child: CircularProgressIndicator()); // Loading screen
         } else if (snapshot.hasError) {
-          return Center(child: Text("Błąd ładowania ćwiczeń!"));
+          return const Center(child: Text("Błąd ładowania ćwiczeń!"));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text("Brak ćwiczeń do wyświetlenia."));
+          return const Center(child: Text("Brak ćwiczeń do wyświetlenia."));
         }
 
-        final exercises = snapshot.data!;
+        // Filter exercises based on the search query
+        final exercises = snapshot.data!
+            .where((exercise) =>
+            exercise.name.toLowerCase().contains(searchQuery.toLowerCase()))
+            .toList();
 
         return AlertDialog(
-          title: Center(
-            child: Text(
-              "Dodaj ćwiczenie",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.blue, // Title color
+          backgroundColor: Colors.white,
+          title: Column(
+            children: [
+              const Text(
+                "Dodaj ćwiczenie",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF2A8CBB), // Title color
+                ),
               ),
-            ),
+              const SizedBox(height: 25),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value; // Update search query
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        hintText: "Search exercises...",
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          borderSide: BorderSide(
+                            color: Colors.blue, // Niebieski kolor obramowania
+                            width: 2,          // Grubość obramowania
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          borderSide: BorderSide(
+                            color: const Color(0xFF2A8CBB), // Niebieski kolor obramowania
+                            width: 2,          // Grubość obramowania
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0), // Smaller padding on left and right
             height: 400, // Fixed height
             width: double.maxFinite, // Full width
-            child: ListView.separated(
+            child: exercises.isEmpty
+                ? const Center(
+              child: Text(
+                "No matching exercises found.",
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+                : ListView.separated(
               itemCount: exercises.length,
               itemBuilder: (context, index) {
                 final exercise = exercises[index];
-                final isAlreadyAdded = exerciseIds.contains(exercise.id);
+                final isAlreadyAdded = widget.exerciseIds.contains(exercise.id);
 
                 return GestureDetector(
                   onTap: () {
                     if (isAlreadyAdded) {
-                      // Show a message that the exercise is already added
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
                             "${exercise.name} is already added.",
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
                           backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                       return;
                     }
 
                     // Logic for adding exercise
-                    TrainingManager.tManager.workoutController!.selectedWorkout.exercises.add(
-                      exercise.application == 1
-                          ? ExerciseWrapper.full(
+                    TrainingManager.tManager.workoutController!
+                        .selectedWorkout.exercises
+                        .add(
+                      ExerciseWrapper.full(
                         exercise: exercise,
                         weights: [],
                         repetitions: [],
-                        series: 0,
-                      )
-                          : ExerciseWrapper.basic(
-                        exercise: exercise,
-                        series: 0,
+                        series: 1,
                       ),
                     );
                     Navigator.of(context).pop(); // Close the dialog
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    padding: const EdgeInsets.symmetric(vertical: 12.0,horizontal: 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: isAlreadyAdded ? Colors.grey[300] : Colors.white,
@@ -106,7 +161,8 @@ class ExerciseSelectionDialog extends StatelessWidget {
                   ),
                 );
               },
-              separatorBuilder: (context, index) => const SizedBox(height: 10), // Increased space between items
+              separatorBuilder: (context, index) =>
+              const SizedBox(height: 10), // Increased space between items
             ),
           ),
         );

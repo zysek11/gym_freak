@@ -31,6 +31,7 @@ class DatabaseHelper {
           name TEXT,
           type TEXT,
           application INTEGER,
+          imagePath TEXT,
           iconPath TEXT,
           groups TEXT,
           description TEXT
@@ -48,6 +49,7 @@ class DatabaseHelper {
         await db.execute('''
         CREATE TABLE workouts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
           exercises TEXT,
           date TEXT,
           intensity REAL,
@@ -405,6 +407,21 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> insertExerciseControllers(List<ExerciseWrapper> controllers) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      for (var controller in controllers) {
+        await txn.insert(
+          'exercise_controllers',
+          controller.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
+
   Future<List<ExerciseWrapper>> getExerciseControllers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('exercise_controllers');
@@ -452,6 +469,29 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Workout.fromMap(maps[i]);
     });
+  }
+
+  Future<List<Workout>> getWorkoutsSortedByDate({bool descending = true}) async {
+    final db = await database;
+    final order = descending ? "DESC" : "ASC"; // Kolejność sortowania
+    final List<Map<String, dynamic>> maps = await db.query(
+      'workouts',
+      orderBy: 'date $order', // Sortowanie według kolumny `date`
+    );
+
+    return List.generate(maps.length, (i) {
+      return Workout.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> updateWorkout(Workout workout) async {
+    final db = await database;
+    await db.update(
+      'workouts',
+      workout.toMap(),
+      where: 'id = ?',
+      whereArgs: [workout.id],
+    );
   }
 
   Future<void> deleteWorkout(int id) async {

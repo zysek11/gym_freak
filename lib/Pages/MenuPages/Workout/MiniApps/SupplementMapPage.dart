@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:gym_freak/database_classes/DatabaseHelper.dart';
 import 'package:gym_freak/database_classes/Supplement.dart';
 import 'package:gym_freak/uiElements/CircularCurvedSegments.dart';
@@ -91,7 +92,8 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
 
 
   Widget getCcsElements(Supplement supplement){
-    if(supplement.checkCounterFlag == 1 && supplement.definiteFlag == 1 && supplement.status == 1){
+    if(supplement.checkCounterFlag != 0 && supplement.definiteFlag == 1 && supplement.status == 1){
+      String text = supplement.checkCounterFlag == 1 ? " TODAY" : " THIS WEEK";
       final DateTime today = DateTime.now();
       DateTime startDate = DateFormat("yyyy-MM-dd").parse(supplement.dateOfStart);
       DateTime endDate = DateFormat("yyyy-MM-dd").parse(supplement.dateOfEnd!);
@@ -107,12 +109,12 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
             Expanded(
                 flex: 1,
                 child: getCcsColumn(true, supplement.counter!, supplement.suppLimit!,
-                    "${supplement.counter!} OF ${supplement.suppLimit!}", " THIS WEEK", supplement: supplement)
+                    "${supplement.counter!} OF ${supplement.suppLimit!}", text, supplement: supplement)
             ),
             Expanded(
               flex: 1,
               child: getCcsColumn(false, counter, alldays,
-                  "$percentagePassed %", " DONE")
+                  "$percentagePassed %", " COMPLETED")
             )
           ],
         ),
@@ -133,12 +135,13 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
         ),
       );
     }
-    else if(supplement.checkCounterFlag == 1 && supplement.definiteFlag == 0   && supplement.status == 1){
+    else if(supplement.checkCounterFlag != 0 && supplement.definiteFlag == 0   && supplement.status == 1){
+      String text = supplement.checkCounterFlag == 1 ? " TODAY" : " THIS WEEK";
       return Padding(
         padding: const EdgeInsets.only(top: 30.0),
         child: Center(
           child: getCcsColumn(true, supplement.counter!, supplement.suppLimit!,
-              "${supplement.counter!} OF ${supplement.suppLimit!}", " THIS WEEK", supplement: supplement),
+              "${supplement.counter!} OF ${supplement.suppLimit!}", text, supplement: supplement),
         ),
       );
     }
@@ -233,8 +236,9 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
     DateTime endDate = supplement.dateOfEnd != null? format.parse(supplement.dateOfEnd!)
       : DateTime(DateTime.now().year,DateTime.now().month, DateTime.now().day);
     bool _isChecked = supplement.definiteFlag == 0? true: false;
-    bool _counting = supplement.checkCounterFlag == 0? false: true;
-    int daysInAWeek = _counting ? supplement.suppLimit! : 1;
+    int countType = supplement.checkCounterFlag;
+    List<String> types = ["No counting", "Count few times a day", "Count few times a week"];
+    int daysInAWeek = countType != 0 ? supplement.suppLimit! : 1;
 
     // counter for max days
     final DateTime today = DateTime.now();
@@ -390,46 +394,49 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
                       controlAffinity: ListTileControlAffinity.trailing,
                     ),
                     SizedBox(height: 10),
-                    CheckboxListTile(
-                      title: Text(
-                        "Count times in a week",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      value: _counting,
-                      activeColor: Color(0xFF2A8CBB),
-                      checkColor: Colors.white,
-                      onChanged: (bool? value) {
+                    DropdownButton<int>(
+                      value: countType,
+                      isExpanded: true,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      style: const TextStyle(color: Colors.black, fontSize: 18),
+                      underline: SizedBox.shrink(), // Usuwa domyślną linię pod spodem
+                      dropdownColor: Colors.white, // Kolor menu rozwijanego
+                      items: types.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+                        int index = entry.key;
+                        String value = entry.value;
+                        return DropdownMenuItem<int>(
+                          value: index, // Ustawienie indeksu jako value
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (int? newValue) {
                         setState(() {
-                          _counting = value ?? false;
+                          countType = newValue!; // Przypisz wybrany indeks
                         });
                       },
-                      controlAffinity: ListTileControlAffinity.trailing,
                     ),
-                    if(_counting)
-                      Row(
-                        children: [
-                          Text(
-                            "Pick days in a week: ",
-                            style: TextStyle(fontSize: 18, color: Colors.black),
-                          ),
-                          SizedBox(width: 10),
-                          DropdownButton<int>(
-                            value: daysInAWeek,
-                            onChanged: (int? newValue) {
-                              setState(() {
-                                daysInAWeek = newValue!;
-                              });
-                            },
-                            items: List.generate(
-                              7,
-                                  (index) => DropdownMenuItem(
-                                value: index + 1,
-                                child: Text((index + 1).toString()),
-                              ),
+                    if(countType != 0)
+                      ...[
+                        SizedBox(height: 15,),
+                        RatingBar(
+                            allowHalfRating: false,
+                            initialRating: daysInAWeek.toDouble(),
+                            minRating: 1,
+                            itemCount: 7,
+                            direction: Axis.horizontal,
+                            itemSize: 32,
+                            itemPadding: EdgeInsets.symmetric(horizontal: 5.0),
+                            ratingWidget: RatingWidget(
+                              full: Image.asset("assets/icons/calendar_full.png",),
+                              empty: Image.asset("assets/icons/calendar_empty.png",),
+                              half: Container(),
                             ),
-                          ),
-                        ],
-                      ),
+                            onRatingUpdate: (days){
+                              daysInAWeek = days.toInt();
+                            }),
+                        SizedBox(height: 10,),
+                      ],
                     SizedBox(height: 20),
                     TextFormField(
                       controller: descController,
@@ -520,14 +527,14 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
                           supplement.unit = unit;
                           supplement.definiteFlag = !_isChecked ? 1 : 0;
                           supplement.dateOfEnd = !_isChecked ? DateFormat('yyyy-MM-dd').format(endDate): null;
-                          if(supplement.checkCounterFlag == 1 && supplement.counter! > daysInAWeek){
-                              supplement.counter = _counting ? daysInAWeek : null;
+                          if(supplement.checkCounterFlag != 0 && supplement.counter! > daysInAWeek){
+                              supplement.counter = countType != 0 ? daysInAWeek : null;
                           }
                           else if(supplement.checkCounterFlag == 0){
-                            supplement.counter = _counting ? 0 : null;
+                            supplement.counter = countType != 0 ? 0 : null;
                           }
-                          supplement.checkCounterFlag = _counting ? 1 : 0;
-                          supplement.suppLimit = _counting ? daysInAWeek : null;
+                          supplement.checkCounterFlag = countType;
+                          supplement.suppLimit = countType != 0 ? daysInAWeek : null;
                           supplement.description = descController.text;
                           await SupplementManager.sManager.updateSupplement(supplement);
                           if(context.mounted){
@@ -721,28 +728,6 @@ class _SupplementMapPageState extends State<SupplementMapPage> {
                     ),
                   ),
                 ),
-                //if(supplement.status == 1)
-                //  ...[
-                //    TrainingButton(
-                //      text: 'EDIT',
-                //      onPressed: () {
-                //        _showEditMeasurementDialog(supplement);
-                //      },
-                //    ),
-                //    SizedBox(height: 10,),
-                //  ],
-                //TrainingButton(
-                //  text: 'DELETE',
-                //  icon: Icons.close,
-                //  textColor: Colors.red,
-                //  onPressed: () async {
-                //    bool decision = await _showDeleteConfirmationDialog(context, supplement);
-                //    if(decision){
-                //      Navigator.of(context).pop();
-                //    }
-                //  },
-                //),
-                // Add more fields as necessary
               ],
             );
           }),

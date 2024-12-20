@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/MiniApps/BodyPage.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/MiniApps/SuppsPage.dart';
+import 'package:gym_freak/Pages/Statistics/PickStatistcs.dart';
 import 'package:gym_freak/database_classes/DatabaseHelper.dart';
 import 'package:provider/provider.dart';
 
@@ -360,7 +361,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  // Your button action here
+                                  Navigator.push(context,  MaterialPageRoute(
+                                      builder: (context) =>
+                                      const PickStatistics()),);
                                 },
                                 child: Row(
                                   mainAxisAlignment:

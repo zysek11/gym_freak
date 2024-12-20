@@ -48,14 +48,23 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
   }
 
   void addSet(ExerciseWrapper exercise) {
-    setState(() {
-      exercise.weights?.add(0); // Dodajemy nową wagę (domyślnie 0 kg)
-      exercise.repetitions?.add(0); // Dodajemy nową liczbę powtórzeń (domyślnie 0 powtórzeń)
-      exercise.series += 1;
-    });
+    if(exercise.exercise.application == 1){
+      setState(() {
+        exercise.weights?.add(0); // Dodajemy nową wagę (domyślnie 0 kg)
+        exercise.repetitions?.add(0); // Dodajemy nową liczbę powtórzeń (domyślnie 0 powtórzeń)
+        exercise.series += 1;
+      });
+
+      _editSetDialog(exercise, exercise.weights!.length - 1);
+    }
+    else{
+      setState(() {
+        exercise.series += 1;
+      });
+    }
 
     // Po dodaniu seta od razu pokazujemy dialog do edycji
-    _editSetDialog(exercise, exercise.weights!.length - 1);
+
   }
 
   void removeExercise(int id){
@@ -71,6 +80,73 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
     ).then((_) {
       setState(() {}); // Refresh the screen after adding an exercise
     });
+  }
+
+  Future<bool?> showDeleteExerciseDialog(BuildContext context, String text) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white, // Tło dialogu
+        title: Center(
+          child: Text(
+            'Delete exercise',
+            style: TextStyle(
+              color: Color(0xFF2A8CBB), // Kolor tekstu tytułu
+              fontSize: 27, // Rozmiar czcionki tytułu
+            ),
+          ),
+        ),
+        content: Text(
+          text,
+          style: TextStyle(
+            fontSize: 20, // Rozmiar czcionki tekstu
+          ),
+        ),
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Równomierne rozmieszczenie przycisków
+            children: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFF2A8CBB), // Kolor tła przycisku
+                  padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), // Wewnętrzny padding
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Zaokrąglone rogi
+                  ),
+                ),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                    color: Colors.white, // Kolor tekstu przycisku
+                    fontWeight: FontWeight.bold, // Pogrubienie tekstu
+                    fontSize: 20,
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, true), // Pozwól na wyjście
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white, // Bez tła, tylko tekst
+                  padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), // Wewnętrzny padding
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Zaokrąglone rogi
+                  ),
+                ),
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                    color: Color(0xFF2A8CBB), // Kolor tekstu przycisku
+                    fontWeight: FontWeight.bold, // Pogrubienie tekstu
+                    fontSize: 20,
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, false), // Nie pozwól na wyjście
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -132,28 +208,31 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.close),
                                   onPressed: () {
-                                    setState(() {
-                                      removeExercise(index);
+                                    setState(() async {
+                                      bool? decision = await showDeleteExerciseDialog(context, "Are you sure you want to delete this exercise?");
+                                      if(decision != null  && decision == true ) removeExercise(index);
                                     });
                                   },
                                 ),
                               ],
                             ),
                             const SizedBox(height: 15),
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: exercise.weights!.length,
-                              separatorBuilder: (context, index) => const Divider(
-                                color: Colors.black, // Kolor separatora
-                                thickness: 1, // Grubość separatora
-                                indent: 25,
-                                endIndent: 25,
-                              ),
-                              itemBuilder: (context, setIndex) {
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: exercise.series -1,
+                            separatorBuilder: (context, index) => const Divider(
+                              color: Colors.black, // Kolor separatora
+                              thickness: 1, // Grubość separatora
+                              indent: 10,
+                              endIndent: 10,
+                            ),
+                            itemBuilder: (context, setIndex) {
+                              if (exercise.exercise.application == 1) {
+                                // Wyświetlanie danych o serii
                                 return Container(
                                   padding: const EdgeInsets.symmetric(vertical: 10),
-                                  margin: const EdgeInsets.symmetric(vertical: 5), // Odstęp pomiędzy elementami
+                                  margin: const EdgeInsets.symmetric(vertical: 3), // Odstęp pomiędzy elementami
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceAround, // Elementy w równych odstępach
                                     children: [
@@ -187,10 +266,36 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
                                     ],
                                   ),
                                 );
-                              },
-
-                            ),
-                            const SizedBox(height: 10),
+                              } else {
+                                // Wyświetlanie informacji o zakończeniu serii z możliwością usunięcia
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  margin: const EdgeInsets.symmetric(vertical: 3), // Odstęp pomiędzy elementami
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                          child: Text(
+                                            "Set ${setIndex + 1} finished.",
+                                            style: TextStyle(fontSize: 18, color: Colors.black),
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () {
+                                          removeSet(exercise, setIndex);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 10),
                             Center(
                               child: ElevatedButton.icon(
                                 onPressed: () {
@@ -223,7 +328,7 @@ class _SummaryExerciseScreenState extends State<SummaryExerciseScreen> {
               TrainingButton(
                 text: 'NEXT',
                 onPressed: () {
-                  if(workout.exercises.any((exercise) => exercise.series == 0)){
+                  if(workout.exercises.any((exercise) => exercise.series == 1)){
                     const snackBar = SnackBar(
                       content: Text(
                         'Do not leave empty exercises ;)',

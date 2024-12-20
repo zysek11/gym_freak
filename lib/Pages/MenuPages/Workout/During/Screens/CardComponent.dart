@@ -40,7 +40,7 @@ class _TimerCardComponentState extends State<TimerCardComponent> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
-                  manager.selectedGroup.name,
+                  "Workout Manager",
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 25,

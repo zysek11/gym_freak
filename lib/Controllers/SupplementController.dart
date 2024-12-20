@@ -20,7 +20,7 @@ class SupplementManager extends ChangeNotifier {
 
 
   Future<bool> addSupplement(String name, double value, String unit, DateTime selectedDate,
-      DateTime endDate, bool indefinite, bool counting, int times, int status, String? description) async {
+      DateTime endDate, bool indefinite, int countType, int times, int status, String? description) async {
     bool validation = await DatabaseHelper().checkSupplementByName(name.toUpperCase());
     if(validation == false){
       return false;
@@ -32,9 +32,9 @@ class SupplementManager extends ChangeNotifier {
       dateOfStart: DateFormat('yyyy-MM-dd').format(selectedDate),
       dateOfEnd: !indefinite ? DateFormat('yyyy-MM-dd').format(endDate): null,
       todayFlag: 0,
-      checkCounterFlag: counting ? 1 : 0,
-      counter: counting ? 0 : null,
-      suppLimit: counting ? times : null,
+      checkCounterFlag: countType,
+      counter: countType != 0 ? 0 : null,
+      suppLimit: countType != 0 ? times : null,
       profileId: 1,
       description: description,
       unit: unit,
@@ -86,9 +86,35 @@ class SupplementManager extends ChangeNotifier {
     }
   }
 
+  Future<void> resetSupplementTake(String todayDate) async {
+    await getSupplements();
+    for(int i = 0; i < supplements.length; i++){
+      if(supplements[i].status != 0 && supplements[i].checkCounterFlag != 0){
+        // tu if sprawdzajacy czy dzienny czy tygodniowy
+        // dla dziennego pomija to liczenie i od razu resetuje
+        // dla tygodniowego liczy, i gdy roznica to równo 7 to resetuje
+        if(supplements[i].checkCounterFlag == 2){
+          DateTime today = DateTime.parse(todayDate);
+          DateTime start = DateTime.parse(supplements[i].dateOfStart);
+          double difference = today.difference(start).inDays.toDouble();
+          if(difference % 7 == 0){
+            supplements[i].counter = 0;
+            await DatabaseHelper().updateSupplement(supplements[i]);
+          }
+        }
+        else{
+          supplements[i].counter = 0;
+          await DatabaseHelper().updateSupplement(supplements[i]);
+        }
+      }
+    }
+  }
+
   Future<void> performSomeOperations(String todayDate) async {
     await DatabaseHelper().resetTodayInSupplements();
     await DatabaseHelper().checkStatusInSupplements(todayDate);
+    await resetSupplementTake(todayDate);
+
   }
 
 

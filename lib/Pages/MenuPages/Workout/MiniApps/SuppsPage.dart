@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../Controllers/SupplementController.dart';
@@ -36,7 +37,8 @@ class _SuppsPageState extends State<SuppsPage> {
         DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
     DateTime endDate = selectedDate;
     bool _isChecked = false;
-    bool _counting = false;
+    int countType = 0;
+    List<String> types = ["No counting", "Count few times a day", "Count few times a week"];
     int daysInAWeek = 1;
 
     return showDialog(
@@ -250,46 +252,49 @@ class _SuppsPageState extends State<SuppsPage> {
                       controlAffinity: ListTileControlAffinity.trailing,
                     ),
                     SizedBox(height: 10),
-                    CheckboxListTile(
-                      title: Text(
-                        "Count times in a week",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      value: _counting,
-                      activeColor: Color(0xFF2A8CBB),
-                      checkColor: Colors.white,
-                      onChanged: (bool? value) {
+                    DropdownButton<int>(
+                      value: countType,
+                      isExpanded: false,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      style: const TextStyle(color: Colors.black, fontSize: 18),
+                      underline: SizedBox.shrink(), // Usuwa domyślną linię pod spodem
+                      dropdownColor: Colors.white, // Kolor menu rozwijanego
+                      items: types.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+                        int index = entry.key;
+                        String value = entry.value;
+                        return DropdownMenuItem<int>(
+                          value: index, // Ustawienie indeksu jako value
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (int? newValue) {
                         setState(() {
-                          _counting = value ?? false;
+                          countType = newValue!; // Przypisz wybrany indeks
                         });
                       },
-                      controlAffinity: ListTileControlAffinity.trailing,
                     ),
-                    if (_counting)
-                      Row(
-                        children: [
-                          Text(
-                            "Pick days in a week: ",
-                            style: TextStyle(fontSize: 18, color: Colors.black),
-                          ),
-                          SizedBox(width: 10),
-                          DropdownButton<int>(
-                            value: daysInAWeek,
-                            onChanged: (int? newValue) {
-                              setState(() {
-                                daysInAWeek = newValue!;
-                              });
-                            },
-                            items: List.generate(
-                              7,
-                              (index) => DropdownMenuItem(
-                                value: index + 1,
-                                child: Text((index + 1).toString()),
-                              ),
+                    if (countType != 0)
+                      ...[
+                        SizedBox(height: 15,),
+                        RatingBar(
+                          allowHalfRating: false,
+                            initialRating: 1,
+                            minRating: 1,
+                            itemCount: 7,
+                            direction: Axis.horizontal,
+                            itemSize: 32,
+                            itemPadding: EdgeInsets.symmetric(horizontal: 5.0),
+                            ratingWidget: RatingWidget(
+                              full: Image.asset("assets/icons/calendar_full.png",),
+                              empty: Image.asset("assets/icons/calendar_empty.png",),
+                                half: Container(),
                             ),
-                          ),
-                        ],
-                      ),
+                            onRatingUpdate: (days){
+                              daysInAWeek = days.toInt();
+                            }),
+                        SizedBox(height: 10,),
+                      ],
                     SizedBox(height: 20),
                     TextFormField(
                       controller: descController,
@@ -298,7 +303,7 @@ class _SuppsPageState extends State<SuppsPage> {
                       decoration: InputDecoration(
                         hintText: 'No, I\'m not busting my ass...',
                         hintStyle: TextStyle(
-                          fontSize: 19,
+                          fontSize: 17,
                           color: Color(0xff444444),
                           fontFamily: 'Jaapokki',
                         ),
@@ -371,7 +376,7 @@ class _SuppsPageState extends State<SuppsPage> {
 
                           bool notExists = await SupplementManager.sManager
                               .addSupplement(name, value, unit, selectedDate,
-                                  endDate, _isChecked, _counting, daysInAWeek, 1,
+                                  endDate, _isChecked, countType, daysInAWeek, 1,
                               descController.text.isEmpty? null : descController.text);
                           if (notExists) {
                             Navigator.of(context).pop();
@@ -626,7 +631,7 @@ class _SupplementRowWidgetState extends State<SupplementRowWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("refresh");
+    print(supplement.checkCounterFlag);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -649,7 +654,7 @@ class _SupplementRowWidgetState extends State<SupplementRowWidget> {
             ),
           ],
         ),
-        if (supplement.checkCounterFlag == 1 && supplement.status == 1)
+        if (supplement.checkCounterFlag != 0 && supplement.status == 1)
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -674,10 +679,16 @@ class _SupplementRowWidgetState extends State<SupplementRowWidget> {
                               text: '${supplement.counter!} OF ${supplement.suppLimit!}',
                               style: const TextStyle(fontSize: 23, color: Color(0xFF2A8CBB), fontFamily: "Jaapokki"),
                             ),
+                            if(supplement.checkCounterFlag == 1)
                             const TextSpan(
-                              text: ' THIS WEEK',
+                              text: ' TODAY',
                               style: TextStyle(fontSize: 20, color: Colors.black, fontFamily: "Jaapokki"),
                             ),
+                            if(supplement.checkCounterFlag == 2)
+                              const TextSpan(
+                                text: ' THIS WEEK',
+                                style: TextStyle(fontSize: 20, color: Colors.black, fontFamily: "Jaapokki"),
+                              ),
                           ],
                         ),
                       ),

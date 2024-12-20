@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../Managers/TrainingManager.dart';
@@ -89,33 +91,50 @@ class _AfterExerciseScreenState extends State<AfterExerciseScreen> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Spacer(),
-                Text(
-                  "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
-                  style: TextStyle(
-                    color: Color(0xFF2A8CBB),
-                    fontSize: 35,
-                    fontFamily: 'Jaapokki',
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
+                      style: TextStyle(
+                        color: Color(0xFF2A8CBB),
+                        fontSize: 35,
+                        fontFamily: 'Jaapokki',
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: Container(width: 4,color: Colors.black, height: 30,),
+                    ),
+                    Text(
+                      "SET ${widget.series}",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 35,
+                        fontFamily: 'Jaapokki',
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 20),
                 Text(
                   currentExercise!.name.toUpperCase(),
                   style: TextStyle(
                     overflow: TextOverflow.ellipsis,
                     color: Colors.black,
-                    fontSize: 35,
+                    fontSize: 30,
                     fontFamily: 'Jaapokki',
                   ),
                 ),
-                SizedBox(height: 15),
-                Text(
-                  "SET: ${widget.series}",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 35,
-                    fontFamily: 'Jaapokki',
+                SizedBox(height: 20),
+                if(currentExercise!.imagePath != '')
+                  Image.file(
+                    File(currentExercise!.imagePath),
+                    height: 200,
+                    fit: BoxFit.contain,
                   ),
-                ),
+                SizedBox(height: 10),
                 Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

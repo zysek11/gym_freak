@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Managers/TrainingManager.dart';
 import '../../../../../database_classes/Exercise.dart';
@@ -75,16 +77,35 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
                 breakActive: false,
                 duringActive: true,
               ),
-              SizedBox(height: 100),
-              Text(
-                "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 40,
-                  fontFamily: 'Jaapokki',
-                ),
+              Spacer(),
+              SizedBox(height: 10),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "EXERCISE ${(widget.exerciseNumber + 1).toString()}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 35,
+                      fontFamily: 'Jaapokki',
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5.0),
+                    child: Container(width: 4,color: Colors.white, height: 30,),
+                  ),
+                  Text(
+                    "SET ${widget.series}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 35,
+                      fontFamily: 'Jaapokki',
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 25),
+              SizedBox(height: 20),
               Text(
                 currentExercise!.name,
                 maxLines: 3,
@@ -92,19 +113,18 @@ class _DuringExerciseScreenState extends State<DuringExerciseScreen> {
                 style: TextStyle(
                   overflow: TextOverflow.ellipsis,
                   color: Colors.white,
-                  fontSize: 40,
+                  fontSize: 30,
                   fontFamily: 'Jaapokki',
                 ),
               ),
-              SizedBox(height: 25),
-              Text(
-                "SET: ${widget.series}",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 40,
-                  fontFamily: 'Jaapokki',
+              SizedBox(height: 20),
+              if(currentExercise!.imagePath != '')
+                Image.file(
+                  File(currentExercise!.imagePath),
+                  height: 200,
+                  fit: BoxFit.contain,
                 ),
-              ),
+              SizedBox(height: 10,),
               Spacer(),
               TrainingButton(
                 text: 'FINISHED!',

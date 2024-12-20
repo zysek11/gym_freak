@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gym_freak/Controllers/GroupsController.dart';
+import 'package:gym_freak/Controllers/StatisticsController.dart';
 import 'package:gym_freak/Controllers/SupplementController.dart';
 import 'package:gym_freak/Pages/MenuPages/Workout/WorkoutPage.dart';
 import 'package:gym_freak/Pages/StarterPages/Starter1.dart';
@@ -8,13 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as Path;
 
-import '../Controllers/ExercisesController.dart';
-import '../Language/LanguageProvider.dart';
-import '../Pages/MenuPages/MainPage.dart';
-import '../Theme/DarkThemeProvider.dart';
-import '../Theme/Styles.dart';
-import '../database_classes/DatabaseHelper.dart';
-import 'Initializer.dart';
+import 'Controllers/ExercisesController.dart';
+import 'Language/LanguageProvider.dart';
+import 'Pages/MenuPages/MainPage.dart';
+import 'Theme/DarkThemeProvider.dart';
+import 'Theme/Styles.dart';
+import 'database_classes/DatabaseHelper.dart';
+import 'Managers/Initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => ExercisesManager.eManager),
         ChangeNotifierProvider(create: (context) => GroupsManager.gManager),
         ChangeNotifierProvider(create: (context) => SupplementManager.sManager),
+        ChangeNotifierProvider(create: (context) => StatisticsController.statsManager),
       ],
       child: Consumer2<DarkThemeProvider, LanguageProvider>(
         builder: (context, themeValue, langValue, child) {
