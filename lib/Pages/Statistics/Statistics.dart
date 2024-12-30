@@ -18,6 +18,7 @@ class _StatisticsState extends State<Statistics> {
   List<ExerciseWrapper> exercisesLimited = [];
   List<Map<String, dynamic>> categories = [];
   List<String> pickedCategories = []; // Wybrane kategorie
+  Map<String,double> differencePower = {};
 
   /// Filters exercises by name and selected categories
   void _filterExercises(String query, List<String> selectedCategories) {
@@ -61,6 +62,46 @@ class _StatisticsState extends State<Statistics> {
     return uniqueExercises.values.toList();
   }
 
+  Widget buildCalculations(double difference){
+    difference = ((difference * 10).roundToDouble()) / 10;
+    if(difference == 9999){
+      return Row(
+        children: [
+          Text("Not enough ", style: TextStyle(fontFamily: 'Lato', fontSize: 13,
+              color: Colors.black, fontWeight: FontWeight.bold),),
+          Image.asset('assets/icons/empty_progress.png',height: 18, width: 18,),
+        ],
+      );
+    }
+    else if(difference < 0.5 && difference > -0.5){
+      return Row(
+        children: [
+          Text(difference.toString() + " % ", style: TextStyle(fontFamily: 'Lato', fontSize: 13,
+              color: Colors.amber, fontWeight: FontWeight.bold,),),
+          Image.asset('assets/icons/zero_progress.png',height: 18, width: 18,),
+        ],
+      );
+    }
+    else if(difference >= 0.5){
+      return Row(
+        children: [
+          Text(difference.toString() + " % ", style: TextStyle(fontFamily: 'Lato', fontSize: 13,
+              color: Colors.green, fontWeight: FontWeight.bold),),
+          Image.asset('assets/icons/increase_progress.png',height: 18, width: 18,),
+        ],
+      );
+    }
+    else {
+      return Row(
+        children: [
+          Text(difference.toString() + " % ", style: TextStyle(fontFamily: 'Lato', fontSize: 13,
+              color: Colors.red, fontWeight: FontWeight.bold),),
+          Image.asset('assets/icons/decrease_progress.png',height: 18, width: 18,),
+        ],
+      );
+    }
+  }
+
   void _loadExerciseCategories() {
     categories = ExerciseTypesManager().allExercises;
   }
@@ -79,6 +120,7 @@ class _StatisticsState extends State<Statistics> {
       final statsController =
       Provider.of<StatisticsController>(context, listen: false);
       await statsController.getExercises();
+      differencePower= statsController.calculatePowerPercentages();
       setState(() {
         exercisesLimited = removeDuplicates(statsController.exercises);
       });
@@ -167,7 +209,7 @@ class _StatisticsState extends State<Statistics> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             // Exercise List
             Expanded(
               child: exercisesLimited.isEmpty
@@ -177,15 +219,76 @@ class _StatisticsState extends State<Statistics> {
                   style: TextStyle(fontSize: 18),
                 ),
               )
-                  : ListView.builder(
-                itemCount: exercisesLimited.length,
-                itemBuilder: (context, index) {
-                  final ExerciseWrapper exercise = exercisesLimited[index];
-                  return ListTile(
-                    title: Text(exercise.exercise.name),
-                    subtitle: Text('Type: ${exercise.exercise.type}'),
-                  );
-                },
+                  : Padding(
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    child: ListView.separated(
+                      itemCount: exercisesLimited.length,
+                      itemBuilder: (context, index) {
+                        final ExerciseWrapper exercise = exercisesLimited[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Color(0xffF8F8F8),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Image.asset(
+                                    exercise.exercise.iconPath,
+                                    width: 45,
+                                    height: 45,
+                                  ),
+                                  SizedBox(width: 20), // Odstęp między obrazkiem a tekstem
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start, // Wyrównanie tekstu do początku
+                                    children: [
+                                      Text(
+                                        exercise.exercise.name,
+                                        style: TextStyle(fontSize: 16, fontFamily: 'Lato'),
+                                      ),
+                                      SizedBox(height: 5,),
+                                      Text(
+                                        exercise.exercise.type,
+                                        style: TextStyle(fontSize: 13, fontFamily: 'Lato',
+                                        color: const Color(0xFF2A8CBB),),
+                                      ),
+                                    ],
+                                  ),
+                                  Spacer(),
+                                  Icon(Icons.read_more,size: 25,color: Colors.black,)
+                                ],
+                              ),
+                              if(exercise.exercise.application == 1)
+                                ...[
+                                  SizedBox(height: 20,),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Text(
+                                            "Actual power",
+                                            style: TextStyle(fontSize: 13, fontFamily: 'Lato',
+                                                color: const Color(0xFF2A8CBB), fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(height: 5,),
+                                          buildCalculations(differencePower[exercise.exercise.name]!),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ]
+                            ],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) => SizedBox(height: 10), // Separator 10px
+                    ),
+
               ),
             ),
           ],

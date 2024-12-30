@@ -43,6 +43,10 @@ class _AddGroupState extends State<AddGroup> {
      }
   }
 
+  Future<bool> checkIfGroupExists(String name) async {
+    return await DatabaseHelper().doesGroupExist(name);
+  }
+
   int getImageIndex(String path) {
     final regex = RegExp(r'\d+');
     final match = regex.firstMatch(path);
@@ -269,11 +273,25 @@ class _AddGroupState extends State<AddGroup> {
                   ),
                   onPressed: () async {
                     if (name_tec.text.isNotEmpty) {
-                      await addGroup();
-                      if (context.mounted) {
+                      bool check = await checkIfGroupExists(name_tec.text);
+                      if(!check){
+                        await addGroup();
+                        if (context.mounted) {
                           Navigator.pop(context, true);
+                        }
                       }
-                    } else {
+                      else{
+                        const snackBar = SnackBar(
+                          content: Text(
+                            'There is group with such a name.',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Color(0xFFFFFFFF),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                    }else {
                       const snackBar = SnackBar(
                         content: Text(
                           'Do not forget about name!',

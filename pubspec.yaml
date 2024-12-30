@@ -110,6 +110,10 @@ flutter:
     - assets/icons/bench_press.png
     - assets/icons/satisfaction.png
     - assets/icons/intensity.png
+    - assets/icons/decrease_progress.png
+    - assets/icons/increase_progress.png
+    - assets/icons/empty_progress.png
+    - assets/icons/zero_progress.png
     - assets/workout_icons/
     - assets/group_icons/
     - assets/screens/

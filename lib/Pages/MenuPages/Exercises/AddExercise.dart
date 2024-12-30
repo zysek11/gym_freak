@@ -49,6 +49,10 @@ class _AddExerciseState extends State<AddExercise> {
     selectedCategory = _exerciseTypesManager.allExercises.first['name'];
   }
 
+  Future<bool> checkIfExerciseExists(String name) async {
+    return await DatabaseHelper().doesExerciseExist(name);
+  }
+
   void loadData() {
     selectedImage = widget.exercise!.imagePath;
     selectedIconIndex = getImageIndex(selectedIcon);
@@ -495,9 +499,25 @@ class _AddExerciseState extends State<AddExercise> {
                 ),
                 onPressed: () async {
                   if (name_tec.text.isNotEmpty) {
-                    await addExercise();
-                    if (context.mounted) {
-                      Navigator.pop(context, true);
+                    bool check = false;
+                    if(widget.edit){
+                      check = await checkIfExerciseExists(name_tec.text);}
+                    if(!check){
+                      await addExercise();
+                      if (context.mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    }
+                    else{
+                      const snackBar = SnackBar(
+                        content: Text(
+                          'There is exercise with such a name.',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Color(0xFFFFFFFF),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     }
                   } else {
                     const snackBar = SnackBar(

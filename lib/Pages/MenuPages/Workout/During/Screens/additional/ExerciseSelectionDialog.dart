@@ -131,6 +131,8 @@ class _ExerciseSelectionDialogState extends State<ExerciseSelectionDialog> {
                         weights: [],
                         repetitions: [],
                         series: 1,
+                        date: TrainingManager.tManager.workoutController!
+                            .selectedWorkout.date
                       ),
                     );
                     Navigator.of(context).pop(); // Close the dialog

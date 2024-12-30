@@ -42,8 +42,10 @@ class DatabaseHelper {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           exercise TEXT,
           series INTEGER,
+          powerCounter REAL,
           weights TEXT,
-          repetitions TEXT
+          repetitions TEXT,
+          date TEXT
         )
       ''');
         await db.execute('''
@@ -364,6 +366,22 @@ class DatabaseHelper {
     });
   }
 
+  Future<bool> doesExerciseExist(String name) async {
+    final db = await database;
+
+    // Zapytanie do bazy danych, aby sprawdzić, czy istnieje ćwiczenie o podanej nazwie
+    final List<Map<String, dynamic>> result = await db.query(
+      'exercises',
+      where: 'name = ?',
+      whereArgs: [name],
+      limit: 1, // Ograniczenie do jednego wyniku
+    );
+
+    // Jeśli wynik nie jest pusty, oznacza to, że ćwiczenie istnieje
+    return result.isNotEmpty;
+  }
+
+
   Future<Exercise?> getLastExercise() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -528,6 +546,21 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Groups.fromMap(maps[i]);
     });
+  }
+
+  Future<bool> doesGroupExist(String name) async {
+    final db = await database;
+
+    // Zapytanie do bazy danych, aby sprawdzić, czy istnieje ćwiczenie o podanej nazwie
+    final List<Map<String, dynamic>> result = await db.query(
+      'groups',
+      where: 'name = ?',
+      whereArgs: [name],
+      limit: 1, // Ograniczenie do jednego wyniku
+    );
+
+    // Jeśli wynik nie jest pusty, oznacza to, że ćwiczenie istnieje
+    return result.isNotEmpty;
   }
 
   Future<Groups?> getLastGroup() async {

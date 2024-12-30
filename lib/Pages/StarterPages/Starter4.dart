@@ -160,9 +160,9 @@ class _StarterFourState extends State<StarterFour> {
                     if(_controller.text.isNotEmpty){
                       await _saveUser();
                       if(mounted){
-                        Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) => const MainPage(),
-                            ));
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => const MainPage(),),
+                              (Route<dynamic> route) => false,);
                       }
                     }
                     else {

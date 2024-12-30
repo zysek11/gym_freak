@@ -12,12 +12,12 @@ class WorkoutController{
   void addExerciseToWorkout(Exercise e, int series, List<double> weights,
       List<int> repetitions){
     selectedWorkout.exercises.add(ExerciseWrapper.full(exercise: e, series: series,
-    weights: weights, repetitions: repetitions));
+    weights: weights, repetitions: repetitions, date: selectedWorkout.date));
   }
 
   void addExerciseToWorkoutBasic(Exercise e, int series){
-    selectedWorkout.exercises.add(ExerciseWrapper.basic(exercise: e, series: series
-        ));
+    selectedWorkout.exercises.add(ExerciseWrapper.basic(exercise: e, series: series,
+        date: selectedWorkout.date));
   }
 
   void removeExerciseFromWorkout(int exerciseId) {
@@ -34,6 +34,7 @@ class WorkoutController{
         series: 0,              // Przypisanie serii na 0
         weights: [],            // Pusta lista dla weights
         repetitions: [],        // Pusta lista dla repetitions
+        date: selectedWorkout.date
       ));
     }
   }
