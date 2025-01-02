@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../database_classes/DatabaseHelper.dart';
 import '../database_classes/ExerciseWrapper.dart';
@@ -149,17 +150,27 @@ class StatisticsController extends ChangeNotifier {
 
   }
 
+  List<DateTime> getDatesForCalendar(String name){
+    List<ExerciseWrapper> selectedExerciseGroup = getExercisesByName(name);
+    List<DateTime> dates = [];
+    for(int i = 0; i < selectedExerciseGroup.length; i++){
+      dates.add(selectedExerciseGroup[i].date);
+    }
+    return dates;
+  }
+
   double calculateMaxPower(String name){
     List<ExerciseWrapper> selectedExerciseGroup = getExercisesByName(name);
+    ExerciseWrapper seg = selectedExerciseGroup.last;
 
-    double calculate(int index){
+    double calculate(){
       double firstPower = 0;
-      ExerciseWrapper ew = selectedExerciseGroup[index];
-      for(int i = 0; i < selectedExerciseGroup[i].series - 1; i++){
+      ExerciseWrapper ew = seg;
+      for(int i = 0; i < ew.series - 1; i++){
         double oneSeriesPower = ew.weights![i] + (ew.powerCounter * (ew.repetitions![i] - 1));
         firstPower += oneSeriesPower;
       }
-      firstPower /= ew.series;
+      firstPower /= (ew.series - 1);
       return firstPower;
     }
 
@@ -168,10 +179,25 @@ class StatisticsController extends ChangeNotifier {
     }
 
     double maxPower = 0;
-    for(int i = 0; i < selectedExerciseGroup.length; i++){
-      maxPower = calculate(i);
-    }
+    maxPower = calculate();
     return maxPower;
+  }
+
+  List<FlSpot> calculateChartPower(String name){
+    List<ExerciseWrapper> selectedExerciseGroup = getExercisesByName(name);
+    List<FlSpot> points = [];
+
+    for(int i = 0; i < selectedExerciseGroup.length; i++){
+      double power = 0;
+      for(int j = 0; i < selectedExerciseGroup[i].series - 1; j++){
+        double oneSeriesPower = selectedExerciseGroup[i].weights![j] +
+            (selectedExerciseGroup[i].powerCounter * (selectedExerciseGroup[i].repetitions![j] - 1));
+        power += oneSeriesPower;
+      }
+      power /= (selectedExerciseGroup[i].series - 1);
+      points.add(FlSpot(selectedExerciseGroup[i].date.millisecondsSinceEpoch.toDouble(), power));
+    }
+    return points;
   }
 
   double calculateMaxWeight(String name) {
@@ -189,6 +215,22 @@ class StatisticsController extends ChangeNotifier {
       }
     }
     return maxWeight;
+  }
+
+  List<FlSpot> calculateChartMaxWeight(String name){
+    List<ExerciseWrapper> selectedExerciseGroup = getExercisesByName(name);
+    List<FlSpot> points = [];
+
+    for(int i = 0; i < selectedExerciseGroup.length; i++){
+      double maxWeight = 0;
+      for(int j = 0; i < selectedExerciseGroup[i].series - 1; j++){
+        if(selectedExerciseGroup[i].repetitions?[j] == 1){
+          maxWeight =  selectedExerciseGroup[i].weights![j];
+        }
+      }
+      points.add(FlSpot(selectedExerciseGroup[i].date.millisecondsSinceEpoch.toDouble(), maxWeight));
+    }
+    return points;
   }
 
   double calculateMaxVolume(String name) {
@@ -211,6 +253,29 @@ class StatisticsController extends ChangeNotifier {
     return maxVolume;
   }
 
+  List<FlSpot> calculateChartVolume(String name){
+    List<ExerciseWrapper> selectedExerciseGroup = getExercisesByName(name);
+    List<FlSpot> points = [];
+
+    for(int i = 0; i < selectedExerciseGroup.length; i++){
+
+      double maxVol = 0;
+      for(int j = 0; j < selectedExerciseGroup[i].series -1; j++){
+        maxVol += (selectedExerciseGroup[i].repetitions![j] * selectedExerciseGroup[i].weights![j]);
+      }
+      points.add(FlSpot(selectedExerciseGroup[i].date.millisecondsSinceEpoch.toDouble(), maxVol));
+    }
+    return points;
+  }
+
+  List<DateTime> getExerciseCalendar(String name){
+    List<ExerciseWrapper> selectedExerciseGroup = getExercisesByName(name);
+    List<DateTime> points = [];
+    for(int i = 0; i < selectedExerciseGroup.length; i++){
+      points.add(selectedExerciseGroup[i].date);
+    }
+    return points;
+  }
 
   Future<void> addWorkout(Workout workout) async {
     await DatabaseHelper().insertWorkout(workout);

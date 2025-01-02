@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_freak/Pages/Statistics/StatsExerciseDetails.dart';
 import 'package:gym_freak/database_classes/ExerciseWrapper.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
@@ -258,7 +259,14 @@ class _StatisticsState extends State<Statistics> {
                                     ],
                                   ),
                                   Spacer(),
-                                  Icon(Icons.read_more,size: 25,color: Colors.black,)
+                                  GestureDetector(
+                                    onTap: (){
+                                      Navigator.push(context,
+                                        MaterialPageRoute(
+                                          builder: (context) => StatsExerciseDetails(exerciseWrapper: exercise),
+                                        ),);
+                                    },
+                                      child: Icon(Icons.read_more,size: 25,color: Colors.black,))
                                 ],
                               ),
                               if(exercise.exercise.application == 1)

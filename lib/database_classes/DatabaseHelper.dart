@@ -439,7 +439,6 @@ class DatabaseHelper {
     });
   }
 
-
   Future<List<ExerciseWrapper>> getExerciseControllers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('exercise_controllers');
@@ -447,6 +446,23 @@ class DatabaseHelper {
       return ExerciseWrapper.fromMap(maps[i]);
     });
   }
+
+  Future<void> updatePowerCounterByList(
+      List<ExerciseWrapper> exercises, double newPowerCounter) async {
+    final db = await database;
+
+    for (var exercise in exercises) {
+      if (exercise.id != null) {
+        await db.update(
+          'exercise_controllers',
+          {'powerCounter': newPowerCounter},
+          where: 'id = ?',
+          whereArgs: [exercise.id],
+        );
+      }
+    }
+  }
+
 
   Future<List<String>> getExerciseTypesByIds(List<int> exerciseIds) async {
     final db = await database;

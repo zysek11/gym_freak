@@ -240,13 +240,13 @@ class _PreviousWorkoutsState extends State<PreviousWorkouts> {
                                                     "Deletion",
                                                     style: TextStyle(
                                                       color: Color(0xFF2A8CBB),
-                                                      fontSize: 27,
+                                                      fontSize: 22,
                                                     ),
                                                   ),
                                                 ),
                                                 content: Text(
                                                   "Are you sure you want to delete this workout from history?",
-                                                  style: TextStyle(fontSize: 20),
+                                                  style: TextStyle(fontSize: 16),
                                                 ),
                                                 actions: <Widget>[
                                                   Row(
@@ -258,7 +258,7 @@ class _PreviousWorkoutsState extends State<PreviousWorkouts> {
                                                           style: TextStyle(
                                                             color: Color(0xFF2A8CBB),
                                                             fontWeight: FontWeight.bold,
-                                                            fontSize: 20,
+                                                            fontSize: 16,
                                                           ),
                                                         ),
                                                         onPressed: () {
@@ -278,7 +278,7 @@ class _PreviousWorkoutsState extends State<PreviousWorkouts> {
                                                           style: TextStyle(
                                                             color: Color(0xFFFFFFFF),
                                                             fontWeight: FontWeight.bold,
-                                                            fontSize: 20,
+                                                            fontSize: 16,
                                                           ),
                                                         ),
                                                         onPressed: () async {

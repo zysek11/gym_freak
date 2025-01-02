@@ -27,6 +27,7 @@ class ExerciseWrapper {
     required this.exercise,
     required this.series,
     required this.date,
+    this.powerCounter = 0,
   })  : weights = null,
         repetitions = null;
 
@@ -52,13 +53,22 @@ class ExerciseWrapper {
 
   factory ExerciseWrapper.fromMap(Map<String, dynamic> map) {
     return ExerciseWrapper.full(
-      id: map['id'] ?? 0,
-      exercise: Exercise.fromMap(jsonDecode(map['exercise'])),
-      series: map['series'],
-      powerCounter: map['powerCounter'],
-      date: DateTime.parse(map['date']),
-      weights: map.containsKey('weights') ? List<double>.from(jsonDecode(map['weights'])) : [], // Domyślnie pusta lista, jeśli null
-      repetitions: map.containsKey('repetitions') ? List<int>.from(jsonDecode(map['repetitions'])) : [], // Domyślnie pusta lista, jeśli null
+      id: map['id'] ?? 0, // Domyślnie 0, jeśli id jest null
+      exercise: Exercise.fromMap(jsonDecode(map['exercise'])), // Rozpakowanie JSON na Exercise
+      series: map['series'] ?? 0, // Domyślnie 0, jeśli series jest null
+      powerCounter: map['powerCounter'] != null
+          ? map['powerCounter'].toDouble()
+          : 2.5, // Domyślnie 2.5, jeśli powerCounter jest null
+      date: map['date'] != null
+          ? DateTime.parse(map['date'])
+          : DateTime.now(), // Domyślnie bieżąca data
+      weights: map.containsKey('weights') && map['weights'] != null
+          ? List<double>.from(jsonDecode(map['weights']))
+          : [], // Domyślnie pusta lista
+      repetitions: map.containsKey('repetitions') && map['repetitions'] != null
+          ? List<int>.from(jsonDecode(map['repetitions']))
+          : [], // Domyślnie pusta lista
     );
   }
+
 }
